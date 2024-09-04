@@ -57,5 +57,6 @@ with open("lista_estacoes.txt", "r", encoding="utf-8") as f:
     except:
       dir_estacao = os.path.join(end_dir, str(codigo))
     z.extractall(dir_estacao)
-
+    if not os.listdir(dir_estacao):
+      os.rmdir(dir_estacao)
 
