@@ -50,6 +50,12 @@ with open("lista_estacoes.txt", "r", encoding="utf-8") as f:
   for estacao in f.readlines():
     codigo = estacao.split()[0]
     print(f"Baixando {codigo}")
-    r = requests.get("http://www.snirh.gov.br/hidroweb/rest/api/documento/download/files", stream=True, params={'codigoestacao': 74209000, 'tipodocumento': "txt", "forcenewfiles": "Y"}, headers=headers)
+    r = requests.get("http://www.snirh.gov.br/hidroweb/rest/api/documento/download/files", stream=True, params={'codigoestacao': codigo, 'tipodocumento': "csv", "forcenewfiles": "Y"}, headers=headers)
     z = zipfile.ZipFile(io.BytesIO(r.content))
-    z.extractall(end_dir)
+    try:
+      dir_estacao = os.mkdir(os.path.join(end_dir, str(codigo)))
+    except:
+      dir_estacao = os.path.join(end_dir, str(codigo))
+    z.extractall(dir_estacao)
+
+
