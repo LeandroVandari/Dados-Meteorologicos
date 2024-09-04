@@ -5,6 +5,7 @@ import random
 import math
 import time
 import zipfile
+import io
 
 auth = jwt.encode({
   "sub": str(math.floor(random.random() * 1e6)),
@@ -40,14 +41,7 @@ headers = {
 "Priority": 'u=1, i',
 }
 
-r = requests.get("http://www.snirh.gov.br/hidroweb/rest/api/documento/download/files", params={'codigoestacao': 74209000, 'tipodocumento': "txt", "forcenewfiles": "Y"}, headers=headers)
-
+r = requests.get("http://www.snirh.gov.br/hidroweb/rest/api/documento/download/files", stream=True, params={'codigoestacao': 74209000, 'tipodocumento': "txt", "forcenewfiles": "Y"}, headers=headers)
+z = zipfile.ZipFile(io.BytesIO(r.content))
+z.extractall(r"C:\Users\aluno\Downloads\req-main")
 print(r.url)
-
-file = bytes(r.text, "utf-8")
-with open("teste.zip", "wb") as f:
-  f.write(file)
-print(file)
-
-with zipfile.ZipFile("file.zip", "w", zipfile.ZIP_DEFLATED) as f:
-    f.writestr("test.txt", file)
