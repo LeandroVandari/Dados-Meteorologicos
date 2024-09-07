@@ -34,6 +34,7 @@ def baixar(enumeracao):
         with open(os.path.join(dir_estacao, "sala_de_situacao.xlsx"), "wb") as f:
             f.write(arquivo_sala_de_situação.content)
     elif len(os.listdir(dir_snirh)) == 0:
+        os.rmdir(dir_snirh)
         os.rmdir(dir_estacao)
 
 
