@@ -1,3 +1,5 @@
 *.zip
 *~
 *~un
+DADOS_ESTACOES/
+__pycache__/
