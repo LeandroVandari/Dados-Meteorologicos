@@ -30,8 +30,11 @@ def baixar(enumeracao):
     arquivo_sala_de_situação = requests.get(
         f"https://saladesituacao.rs.gov.br/api/station/ana/sheet/{codigo}",
     )
-    with open(os.path.join(dir_estacao, "sala_de_situacao.xlsx"), "wb") as f:
-        f.write(arquivo_sala_de_situação.content)
+    if arquivo_sala_de_situação.content != b'{"message":"Erro: Esta\\u00e7\\u00e3o sem dados"}\n':
+        with open(os.path.join(dir_estacao, "sala_de_situacao.xlsx"), "wb") as f:
+            f.write(arquivo_sala_de_situação.content)
+    elif len(os.listdir(dir_snirh)):
+        os.rmdir(estacao)
 
 
 def main():
