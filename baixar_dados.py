@@ -60,7 +60,7 @@ def baixar_todos(lista_estacoes=None, use_cached=True):
         print(mensagem_baixando)
 
         codigos = enumerate(estacao.strip() for estacao in estacoes)
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor() as executor:
             executor.map(baixar, codigos)
     print(f"\033[A{mensagem_baixando}Pronto!")
 
