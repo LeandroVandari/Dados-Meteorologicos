@@ -16,9 +16,11 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | Non
     print(f"\tPROCESSANDO: {idx}/{total}    ", end = "\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
-        arquivo = pandas.read_excel(arquivo, skiprows=[0,1, 2, 3, 5, 6, 7, 8], index_col = 0)
+        arquivo = pandas.read_excel(arquivo, skiprows=[0,1, 2, 3, 5, 6, 7, 8])
         if arquivo.shape[0] < 8:
             return None
+        arquivo.set_index(arquivo["Data"].map(lambda data: pandas.Timestamp(datetime.strptime(data, "%d/%m/%Y %H:%M:%S"))), inplace=True)
+        arquivo.drop("Data", axis="columns", inplace = True)
         arquivo.insert(0, 'CodigoEstacao', codigo_estacao)
         return arquivo
 
@@ -65,20 +67,24 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
     pasta_sala_de_situacao = pasta_processados / "Sala de situação"
     pasta_sala_de_situacao.mkdir(exist_ok=True)
 
-    print("\tProcessando arquivos da sala de situações...   ")
+    print("\tCarregando arquivos da sala de situações...   ")
     counter = 1
     total = len(list(pasta_estacoes.iterdir()))
     arquivos = ((tup[0],tup[1] / "sala_de_situacao.xlsx", total) for tup in enumerate(pasta_estacoes.iterdir()))
     with ProcessPoolExecutor() as executor:
         arquivos = filter(lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos))
-
+    print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
+    print("\tJuntando arquivos por data...    ", end = "", flush=True)
     final = pandas.concat(arquivos)
-    grouping = final.groupby(by=lambda data: datetime.strptime(data, "%d/%m/%Y %H:%M:%S").year)
-
+    grouping = final.groupby(by=lambda data: data.year)
+    print("Pronto!")
+    print("\tCriando novos arquivos...   ")
     for (ano, df) in grouping:
-        df.sort_index(key=lambda index: index.map(lambda data: datetime.strptime(data, "%d/%m/%Y %H:%M:%S")), inplace=True)
+        print(f"\tCriando arquivo do ano {ano}   ", end = "\r")
+        df.sort_index(inplace=True)
         df.to_csv(pasta_sala_de_situacao / f"{ano}.csv", sep=";")    
-    print(f"\t\033[AProcessando arquivos da sala de situações...   Pronto!")
+    print("\033[A\tCriando novos arquivos...   Pronto!")
+    
     print(" "*100)
 
 
