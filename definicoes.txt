@@ -1,0 +1,3 @@
+Cotas fluviométricas 
+O nível da água ou cota fluviométrica é representado convencionalmente pela letra H “é a altura da atingida da água na seção em relação a uma determinada referência. Pode ser um valor instantâneo ou a média em um determinado intervalo de tempo (dia, mês, ano)” (MARTINS, 1976, pag. 39).
+
