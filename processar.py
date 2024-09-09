@@ -13,7 +13,7 @@ def sort_snirh(line, date_index):
 
 def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | None:
     idx, arquivo, total = arquivo
-    print(f"\tPROCESSANDO: {idx}/{total}    ", end = "\r")
+    print(f"\tCARREGANDO: {idx}/{total}    ", end = "\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
         arquivo = pandas.read_excel(arquivo, skiprows=[0,1, 2, 3, 5, 6, 7, 8])
@@ -74,10 +74,12 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
     with ProcessPoolExecutor() as executor:
         arquivos = filter(lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos))
     print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
+
     print("\tJuntando arquivos por data...    ", end = "", flush=True)
     final = pandas.concat(arquivos)
     grouping = final.groupby(by=lambda data: data.year)
     print("Pronto!")
+
     print("\tCriando novos arquivos...   ")
     for (ano, df) in grouping:
         print(f"\tCriando arquivo do ano {ano}   ", end = "\r")
