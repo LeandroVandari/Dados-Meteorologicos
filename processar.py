@@ -25,7 +25,7 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | Non
         ).with_columns(
             polars.col("Data").str.strptime(polars.Datetime, "%d/%m/%Y %H:%M:%S"),
             CodigoEstacao=polars.lit(codigo_estacao),
-        )
+        ).set_sorted("Data", descending = True)
         return arquivo
 
 
@@ -83,23 +83,32 @@ def processar(
         for tup in enumerate(pasta_estacoes.iterdir())
     )
     with ProcessPoolExecutor() as executor:
-        arquivos = filter(
+        arquivos = filter(lambda arquivo: (arquivo.select(polars.max("Nível (cm)"))[0,0] or 0) >= 10000, filter(
             lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos)
-        )
+        ))
     print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
 
-    print("\tJuntando arquivos por data...    ", end="", flush=True)
-    final = polars.concat(arquivos)
-    grouping = final.group_by(polars.col("Data").dt.year())
+    print("\tOrdenando arquivos por data...   ", end="", flush=True)
+    final = polars.concat(arquivos).sort("Data")
+    print("Pronto!")
+    print("\tSalvando em arquivo parquet...   ", end="", flush=True)
+    final.write_parquet(pasta_sala_de_situacao / "sala_de_situacao.parquet")
     print("Pronto!")
 
-    print("\tCriando novos arquivos...   ")
-    for ano, df in grouping:
-        ano = ano[0]
-        print(f"\tCriando arquivo do ano {ano}   ", end="\r")
-        df = df.sort("Data")
-        df.write_csv(pasta_sala_de_situacao / f"{ano}.csv", separator=";", datetime_format="%d/%m/%Y %H:%M:%S")
-    print("\033[A\tCriando novos arquivos...   Pronto!")
+    """ Código para criar arquivos CSV separados por ano:
+            ```py 
+            print("\tJuntando arquivos por data...    ", end="", flush=True)
+            grouping = final.group_by(polars.col("Data").dt.year())
+            print("Pronto!")
+
+            print("\tCriando novos arquivos...   ")
+            for ano, df in grouping:
+                ano = ano[0]
+                print(f"\tCriando arquivo do ano {ano}   ", end="\r")
+                df = df.sort("Data")
+                df.write_csv(pasta_sala_de_situacao / f"{ano}.csv", separator=";", datetime_format="%d/%m/%Y %H:%M:%S")
+            print("\033[A\tCriando novos arquivos...   Pronto!")``` 
+    """
     print(" " * 100)
 
 
