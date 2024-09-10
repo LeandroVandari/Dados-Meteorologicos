@@ -5,6 +5,7 @@ import csv
 from datetime import datetime, date
 import pandas
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import polars
 
 def sort_snirh(line, date_index):
     if line[0] ==  "EstacaoCodigo" or line[date_index] == "":
@@ -16,12 +17,8 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | Non
     print(f"\tCARREGANDO: {idx}/{total}    ", end = "\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
-        arquivo = pandas.read_excel(arquivo, skiprows=[0,1, 2, 3, 5, 6, 7, 8])
-        if arquivo.shape[0] < 8:
-            return None
-        arquivo.set_index(arquivo["Data"].map(lambda data: pandas.Timestamp(datetime.strptime(data, "%d/%m/%Y %H:%M:%S"))), inplace=True)
-        arquivo.drop("Data", axis="columns", inplace = True)
-        arquivo.insert(0, 'CodigoEstacao', codigo_estacao)
+        arquivo = polars.read_excel(arquivo, read_options={"header_row": 4}).with_columns(polars.col("Data").str.strptime(polars.Datetime, "%d/%m/%Y %H:%M:%S"), CodigoEstacao=polars.lit(codigo_estacao))
+        print(arquivo)
         return arquivo
 
 def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados: Path | None = None):
@@ -32,7 +29,7 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
         pasta_processados.mkdir(exist_ok = True)
 
 #SNIRH
-    nomes_arquivos = set()
+    """ nomes_arquivos = set()
     print("\tProcessando arquivos SNIRH...   ", end="", flush = True)
     #Descobrir todos os tipos de arquivo que o snirh tem (Formato: {numero da estação}_{tipo do arquivo}.csv)
     for estacao in pasta_estacoes.iterdir():
@@ -62,7 +59,7 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerows(linhas)
     print("Pronto!")
-
+ """
 #SALA DE SITUAÇÃO
     pasta_sala_de_situacao = pasta_processados / "Sala de situação"
     pasta_sala_de_situacao.mkdir(exist_ok=True)
@@ -76,7 +73,7 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
     print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
 
     print("\tJuntando arquivos por data...    ", end = "", flush=True)
-    final = pandas.concat(arquivos)
+    final = polars.concat(arquivos)
     grouping = final.groupby(by=lambda data: data.year)
     print("Pronto!")
 
@@ -86,7 +83,6 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
         df.sort_index(inplace=True)
         df.to_csv(pasta_sala_de_situacao / f"{ano}.csv", sep=";")    
     print("\033[A\tCriando novos arquivos...   Pronto!")
-    
     print(" "*100)
 
 
