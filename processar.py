@@ -5,33 +5,41 @@ import csv
 from datetime import datetime, date
 import pandas
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import polars
+
 
 def sort_snirh(line, date_index):
-    if line[0] ==  "EstacaoCodigo" or line[date_index] == "":
+    if line[0] == "EstacaoCodigo" or line[date_index] == "":
         return datetime(1, 1, 1, 0, 0)
     return datetime.strptime(line[date_index], "%d/%m/%Y")
 
+
 def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | None:
     idx, arquivo, total = arquivo
-    print(f"\tCARREGANDO: {idx}/{total}    ", end = "\r")
+    print(f"\tCARREGANDO: {idx}/{total}    ", end="\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
-        arquivo = pandas.read_excel(arquivo, skiprows=[0,1, 2, 3, 5, 6, 7, 8])
-        if arquivo.shape[0] < 8:
-            return None
-        arquivo.set_index(arquivo["Data"].map(lambda data: pandas.Timestamp(datetime.strptime(data, "%d/%m/%Y %H:%M:%S"))), inplace=True)
-        arquivo.drop("Data", axis="columns", inplace = True)
-        arquivo.insert(0, 'CodigoEstacao', codigo_estacao)
+        arquivo = polars.read_excel(
+            arquivo, read_options={"header_row": 4},
+            schema_overrides={"Nível (cm)": polars.Float64, "Vazão (m³/s)": polars.Float64, "Chuva (mm)": polars.Float64}
+        ).with_columns(
+            polars.col("Data").str.strptime(polars.Datetime, "%d/%m/%Y %H:%M:%S"),
+            CodigoEstacao=polars.lit(codigo_estacao),
+        ).set_sorted("Data", descending = True)
         return arquivo
 
-def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados: Path | None = None):
-    print("Processando dados baixados...   ", end = "\n", flush = True)
+
+def processar(
+    pasta_estacoes: Path = Path("DADOS_ESTACOES/"),
+    pasta_processados: Path | None = None,
+):
+    print("Processando dados baixados...   ", end="\n", flush=True)
 
     if pasta_processados is None:
         pasta_processados = Path("PROCESSADOS")
-        pasta_processados.mkdir(exist_ok = True)
+        pasta_processados.mkdir(exist_ok=True)
 
-#SNIRH
+    # SNIRH
     nomes_arquivos = set()
     print("\tProcessando arquivos SNIRH...   ", end="", flush = True)
     #Descobrir todos os tipos de arquivo que o snirh tem (Formato: {numero da estação}_{tipo do arquivo}.csv)
@@ -62,38 +70,47 @@ def processar(pasta_estacoes: Path = Path("DADOS_ESTACOES/"), pasta_processados:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerows(linhas)
     print("Pronto!")
-
-#SALA DE SITUAÇÃO
+ 
+    # SALA DE SITUAÇÃO
     pasta_sala_de_situacao = pasta_processados / "Sala de situação"
     pasta_sala_de_situacao.mkdir(exist_ok=True)
 
     print("\tCarregando arquivos da sala de situações...   ")
     counter = 1
     total = len(list(pasta_estacoes.iterdir()))
-    arquivos = ((tup[0],tup[1] / "sala_de_situacao.xlsx", total) for tup in enumerate(pasta_estacoes.iterdir()))
+    arquivos = (
+        (tup[0], tup[1] / "sala_de_situacao.xlsx", total)
+        for tup in enumerate(pasta_estacoes.iterdir())
+    )
     with ProcessPoolExecutor() as executor:
-        arquivos = filter(lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos))
+        arquivos = filter(lambda arquivo: (arquivo.select(polars.max("Nível (cm)"))[0,0] or 0) >= 10000, filter(
+            lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos)
+        ))
     print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
 
-    print("\tJuntando arquivos por data...    ", end = "", flush=True)
-    final = pandas.concat(arquivos)
-    grouping = final.groupby(by=lambda data: data.year)
+    print("\tOrdenando arquivos por data...   ", end="", flush=True)
+    final = polars.concat(arquivos).sort("Data")
+    print("Pronto!")
+    print("\tSalvando em arquivo parquet...   ", end="", flush=True)
+    final.write_parquet(pasta_sala_de_situacao / "sala_de_situacao.parquet")
     print("Pronto!")
 
-    print("\tCriando novos arquivos...   ")
-    for (ano, df) in grouping:
-        print(f"\tCriando arquivo do ano {ano}   ", end = "\r")
-        df.sort_index(inplace=True)
-        df.to_csv(pasta_sala_de_situacao / f"{ano}.csv", sep=";")    
-    print("\033[A\tCriando novos arquivos...   Pronto!")
-    
-    print(" "*100)
+    """ Código para criar arquivos CSV separados por ano:
+            ```py 
+            print("\tJuntando arquivos por data...    ", end="", flush=True)
+            grouping = final.group_by(polars.col("Data").dt.year())
+            print("Pronto!")
 
-
+            print("\tCriando novos arquivos...   ")
+            for ano, df in grouping:
+                ano = ano[0]
+                print(f"\tCriando arquivo do ano {ano}   ", end="\r")
+                df = df.sort("Data")
+                df.write_csv(pasta_sala_de_situacao / f"{ano}.csv", separator=";", datetime_format="%d/%m/%Y %H:%M:%S")
+            print("\033[A\tCriando novos arquivos...   Pronto!")``` 
+    """
+    print(" " * 100)
 
 
 if __name__ == "__main__":
     processar()
-
-
-

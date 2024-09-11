@@ -5,3 +5,4 @@ DADOS_ESTACOES/
 __pycache__/
 DADOS_ESTACOES_BACKUP/
 PROCESSADOS/
+lista_estacoes.txt
