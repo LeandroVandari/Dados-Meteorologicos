@@ -19,14 +19,26 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | Non
     print(f"\tCARREGANDO: {idx}/{total}    ", end="\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
-        arquivo = polars.read_excel(
-            arquivo, read_options={"header_row": 4},
-            schema_overrides={"Nível (cm)": polars.Float64, "Vazão (m³/s)": polars.Float64, "Chuva (mm)": polars.Float64}
-        ).with_columns(
-            polars.col("Data").str.strptime(polars.Datetime, "%d/%m/%Y %H:%M:%S"),
-            CodigoEstacao=polars.lit(codigo_estacao),
-        ).set_sorted("Data", descending = True)
-        return arquivo
+        arquivo = (
+            polars.read_excel(
+                arquivo,
+                read_options={"header_row": 4},
+                schema_overrides={
+                    "Nível (cm)": polars.Float64,
+                    "Vazão (m³/s)": polars.Float64,
+                    "Chuva (mm)": polars.Float64,
+                },
+            )
+            .with_columns(
+                polars.col("Data").str.strptime(polars.Datetime, "%d/%m/%Y %H:%M:%S"),
+                CodigoEstacao=polars.lit(codigo_estacao),
+            )
+            .set_sorted("Data", descending=True)
+        )
+
+        com_maximo_dia = arquivo.with_columns(polars.col("Nível (cm)").max().over(polars.col("Data").dt.date()).alias("MaximoDia"))
+        filtrado = com_maximo_dia.filter(polars.col("MaximoDia") <= 10000).select(polars.exclude("MaximoDia"))
+        return filtrado
 
 
 def processar(
@@ -41,8 +53,8 @@ def processar(
 
     # SNIRH
     nomes_arquivos = set()
-    print("\tProcessando arquivos SNIRH...   ", end="", flush = True)
-    #Descobrir todos os tipos de arquivo que o snirh tem (Formato: {numero da estação}_{tipo do arquivo}.csv)
+    print("\tProcessando arquivos SNIRH...   ", end="\n", flush=True)
+    # Descobrir todos os tipos de arquivo que o snirh tem (Formato: {numero da estação}_{tipo do arquivo}.csv)
     for estacao in pasta_estacoes.iterdir():
         dir_snirh = estacao / "snirh/"
         if dir_snirh.exists():
@@ -50,9 +62,9 @@ def processar(
                 nome_arquivo = re.sub("[0-9_]", "", arquivo.name)
                 nomes_arquivos.add(nome_arquivo)
 
-
-    #Juntar todos os arquivos de mesmo tipo de todas as estaçãos em um só arquivo
+    # Juntar todos os arquivos de mesmo tipo de todas as estaçãos em um só arquivo
     for nome in nomes_arquivos:
+        print(f"PROCESSANDO ARQUIVO {nome}...", end="\r", flush=True)
         arquivo_juncao = pasta_processados / f"{nome}"
         linhas = []
         for estacao in pasta_estacoes.iterdir():
@@ -63,14 +75,17 @@ def processar(
                     reader = csv.reader(arquivo, delimiter=";")
                     for line in reader:
                         if len(line) > 0:
-                            if line[0] == estacao.name or (len(linhas) == 0 and line[0] == "EstacaoCodigo"):
+                            if line[0] == estacao.name or (
+                                len(linhas) == 0 and line[0] == "EstacaoCodigo"
+                            ):
                                 linhas.append(line)
         linhas = sorted(linhas, key=lambda linha: sort_snirh(linha, 2))
         with arquivo_juncao.open(mode="w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerows(linhas)
-    print("Pronto!")
- 
+    
+    print("\033[A\tProcessando arquivos SNIRH...   Pronto!")
+
     # SALA DE SITUAÇÃO
     pasta_sala_de_situacao = pasta_processados / "Sala de situação"
     pasta_sala_de_situacao.mkdir(exist_ok=True)
@@ -83,9 +98,9 @@ def processar(
         for tup in enumerate(pasta_estacoes.iterdir())
     )
     with ProcessPoolExecutor() as executor:
-        arquivos = filter(lambda arquivo: (arquivo.select(polars.max("Nível (cm)"))[0,0] or 0) >= 10000, filter(
+        arquivos = filter(
             lambda i: i is not None, executor.map(abrir_sala_de_situacoes, arquivos)
-        ))
+        )
     print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
 
     print("\tOrdenando arquivos por data...   ", end="", flush=True)
