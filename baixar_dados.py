@@ -8,6 +8,7 @@ from pathlib import Path
 
 from snirh import headers
 
+
 def baixar(enumeracao):
     global cuse_cached
     idx, codigo = enumeracao
@@ -27,24 +28,29 @@ def baixar(enumeracao):
         )
         arquivo_zip = zipfile.ZipFile(io.BytesIO(arquivo_snirh.content))
 
-
         dir_snirh = criar_pasta(dir_estacao, "snirh")
 
         arquivo_zip.extractall(dir_snirh)
-
 
     if (not (dir_estacao / "sala_de_situacao.xlsx").exists()) or cuse_cached == False:
         arquivo_sala_de_situação = requests.get(
             f"https://saladesituacao.rs.gov.br/api/station/ana/sheet/{codigo}",
         )
 
-        if arquivo_sala_de_situação.content != b'{"message":"Erro: Esta\\u00e7\\u00e3o sem dados"}\n':
+        if (
+            arquivo_sala_de_situação.content
+            != b'{"message":"Erro: Esta\\u00e7\\u00e3o sem dados"}\n'
+        ):
             with open(os.path.join(dir_estacao, "sala_de_situacao.xlsx"), "wb") as f:
                 f.write(arquivo_sala_de_situação.content)
-            
-        
-    
 
+def baixar_inmet(year):
+    print(f"\tBAIXANDO ANO {year}...   ", end="\r", flush=True)
+    if (not (dir_inmet / str(year)).exists()) or cuse_cached == False:
+        arquivo = requests.get(f"https://portal.inmet.gov.br/uploads/dadoshistoricos/{year}.zip")
+        arquivo_zip = zipfile.ZipFile(io.BytesIO(arquivo.content))
+        dir_ano = criar_pasta(dir_inmet, str(year))
+        arquivo_zip.extractall(dir_ano)
 
 def baixar_todos(lista_estacoes=None, use_cached=True):
     global cuse_cached
@@ -62,7 +68,14 @@ def baixar_todos(lista_estacoes=None, use_cached=True):
             executor.map(baixar, codigos)
     print(f"\033[A{mensagem_baixando}Pronto!")
 
-            
+    print("Baixando dados do INMET...   ")
+    dir_inmet = criar_pasta(end_dir, "INMET")
+    anos = range(2000, 2025)
+    with ThreadPoolExecutor() as executor:
+        executor.map(baixar_inmet, anos)
+    print("\033[ABaixando dados do INMET...   Pronto!")
+        
+
 
 def criar_pasta(pai: Path, nome: str) -> str:
     pasta = pai / nome
@@ -70,11 +83,9 @@ def criar_pasta(pai: Path, nome: str) -> str:
 
     return pasta
 
+
 end_dir = criar_pasta(Path.cwd(), "DADOS_ESTACOES/")
 cuse_cached = True
 
 if __name__ == "__main__":
     baixar_todos()
-
-
-

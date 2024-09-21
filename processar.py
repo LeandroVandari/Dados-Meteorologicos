@@ -3,22 +3,26 @@ from pathlib import Path
 import re
 import csv
 from datetime import datetime, date
-import pandas
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import polars
+import matplotlib.pyplot as plt
+import altair
+import time
 
-
+altair.renderers.enable("browser")
+altair.data_transformers.enable("vegafusion")
 def sort_snirh(line, date_index):
     if line[0] == "EstacaoCodigo" or line[date_index] == "":
         return datetime(1, 1, 1, 0, 0)
     return datetime.strptime(line[date_index], "%d/%m/%Y")
 
 
-def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | None:
+def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | None:
     idx, arquivo, total = arquivo
     print(f"\tCARREGANDO: {idx}/{total}    ", end="\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
+        nome_arquivo = arquivo
         arquivo = (
             polars.read_excel(
                 arquivo,
@@ -36,9 +40,21 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> pandas.DataFrame | Non
             .set_sorted("Data", descending=True)
         )
 
-        com_maximo_dia = arquivo.with_columns(polars.col("Nível (cm)").max().over(polars.col("Data").dt.date()).alias("MaximoDia"))
-        filtrado = com_maximo_dia.filter(polars.col("MaximoDia") <= 10000).select(polars.exclude("MaximoDia"))
-        return filtrado
+        com_maximo_dia = arquivo.with_columns(
+            polars.col("Nível (cm)")
+            .max()
+            .over(polars.col("Data").dt.date())
+            .alias("MaximoDia")
+        )
+        """ print(f"Abrindo gráfico da estação {codigo_estacao}")
+        print()
+        grafico = com_maximo_dia.plot.line(x="Data", y="Nível (cm)").properties(width=500).configure_scale(zero=False)
+        grafico.show()  """
+        mediana = com_maximo_dia.select(polars.median("Nível (cm)").alias("Mediana"))[0,0]
+
+        novo = com_maximo_dia.filter(abs(polars.col("Nível (cm)") - mediana) <= 1000)
+        novo = novo.with_columns(((polars.col("Nível (cm)")-polars.min("Nível (cm)")) / (polars.col("Nível (cm)").max()-polars.col("Nível (cm)").min())).alias("Normalizado"))
+        return novo
 
 
 def processar(
@@ -64,7 +80,7 @@ def processar(
 
     # Juntar todos os arquivos de mesmo tipo de todas as estaçãos em um só arquivo
     for nome in nomes_arquivos:
-        print(f"PROCESSANDO ARQUIVO {nome}...", end="\r", flush=True)
+        print(f"\tPROCESSANDO ARQUIVO {nome}...            ", end="\r", flush=True)
         arquivo_juncao = pasta_processados / f"{nome}"
         linhas = []
         for estacao in pasta_estacoes.iterdir():
@@ -83,19 +99,19 @@ def processar(
         with arquivo_juncao.open(mode="w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=";")
             writer.writerows(linhas)
-    
+
     print("\033[A\tProcessando arquivos SNIRH...   Pronto!")
 
     # SALA DE SITUAÇÃO
     pasta_sala_de_situacao = pasta_processados / "Sala de situação"
     pasta_sala_de_situacao.mkdir(exist_ok=True)
 
-    print("\tCarregando arquivos da sala de situações...   ")
+    print(" " * 20, "\r\tCarregando arquivos da sala de situações...   ")
     counter = 1
     total = len(list(pasta_estacoes.iterdir()))
     arquivos = (
         (tup[0], tup[1] / "sala_de_situacao.xlsx", total)
-        for tup in enumerate(pasta_estacoes.iterdir())
+        for tup in enumerate(pasta_estacoes.iterdir()) if tup[0] <= 100
     )
     with ProcessPoolExecutor() as executor:
         arquivos = filter(
