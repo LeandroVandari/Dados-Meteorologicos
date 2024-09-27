@@ -9,6 +9,8 @@ import time
 
 altair.renderers.enable("browser")
 altair.data_transformers.enable("vegafusion")
+
+
 def sort_snirh(line, date_index):
     if line[0] == "EstacaoCodigo" or line[date_index] == "":
         return datetime(1, 1, 1, 0, 0)
@@ -48,17 +50,41 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | Non
         grafico = com_maximo_dia.plot.line(x="Data", y="Vazão (m³/s)").properties(width=500).configure_scale(zero=False)
         grafico.show() """
 
-        com_maximo_dia = com_maximo_dia.filter(polars.col("Nível (cm)").is_not_null() | polars.col("Vazão (m³/s)").is_not_null())
+        com_maximo_dia = com_maximo_dia.filter(
+            polars.col("Nível (cm)").is_not_null()
+            | polars.col("Vazão (m³/s)").is_not_null()
+        )
 
-        mediana_nivel = com_maximo_dia.select(polars.median("Nível (cm)").alias("Mediana"))[0,0]
-        nivel_filtrado = com_maximo_dia.filter((abs(polars.col("Nível (cm)") - mediana_nivel) <= 1000) | polars.col("Nível (cm)").is_null())
-        normalizado = nivel_filtrado.with_columns(((polars.col("Nível (cm)")-polars.min("Nível (cm)")) / (polars.col("Nível (cm)").max()-polars.col("Nível (cm)").min())).alias("Nível normalizado"))
+        mediana_nivel = com_maximo_dia.select(
+            polars.median("Nível (cm)").alias("Mediana")
+        )[0, 0]
+        nivel_filtrado = com_maximo_dia.filter(
+            (abs(polars.col("Nível (cm)") - mediana_nivel) <= 1000)
+            | polars.col("Nível (cm)").is_null()
+        )
+        normalizado = nivel_filtrado.with_columns(
+            (
+                (polars.col("Nível (cm)") - polars.min("Nível (cm)"))
+                / (polars.col("Nível (cm)").max() - polars.col("Nível (cm)").min())
+            ).alias("Nível normalizado")
+        )
 
-        mediana_e_std_vazao = normalizado.select(polars.median("Vazão (m³/s)").alias("mediana"), polars.std("Vazão (m³/s)").alias("std"))
-        mediana_vazao = mediana_e_std_vazao[0,0]
-        std = mediana_e_std_vazao[0,1]
-        vazao_filtrada = normalizado.filter((abs(polars.col("Vazão (m³/s)")-mediana_vazao) <= 3* (std or 0)) | polars.col("Vazão (m³/s)").is_null())
-        normalizado = vazao_filtrada.with_columns(((polars.col("Vazão (m³/s)")-polars.min("Vazão (m³/s)")) / (polars.col("Vazão (m³/s)").max()-polars.col("Vazão (m³/s)").min())).alias("Vazão normalizada"))
+        mediana_e_std_vazao = normalizado.select(
+            polars.median("Vazão (m³/s)").alias("mediana"),
+            polars.std("Vazão (m³/s)").alias("std"),
+        )
+        mediana_vazao = mediana_e_std_vazao[0, 0]
+        std = mediana_e_std_vazao[0, 1]
+        vazao_filtrada = normalizado.filter(
+            (abs(polars.col("Vazão (m³/s)") - mediana_vazao) <= 3 * (std or 0))
+            | polars.col("Vazão (m³/s)").is_null()
+        )
+        normalizado = vazao_filtrada.with_columns(
+            (
+                (polars.col("Vazão (m³/s)") - polars.min("Vazão (m³/s)"))
+                / (polars.col("Vazão (m³/s)").max() - polars.col("Vazão (m³/s)").min())
+            ).alias("Vazão normalizada")
+        )
 
         return normalizado
 
@@ -66,8 +92,7 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | Non
 def processar(
     pasta_estacoes: Path = Path("DADOS_ESTACOES/"),
     pasta_processados: Path | None = None,
-
-    ignorar_fontes: set[str] = {}
+    ignorar_fontes: set[str] = {},
 ):
     print("Processando dados baixados...   ", end="\n", flush=True)
 
@@ -96,7 +121,9 @@ def processar(
                 arquivo = estacao / "snirh/" / f"{estacao.name}_{nome}"
 
                 if arquivo.exists():
-                    with arquivo.open(mode="r", newline="", encoding="latin_1") as arquivo:
+                    with arquivo.open(
+                        mode="r", newline="", encoding="latin_1"
+                    ) as arquivo:
                         reader = csv.reader(arquivo, delimiter=";")
                         for line in reader:
                             if len(line) > 0:
@@ -136,14 +163,15 @@ def processar(
         final.write_parquet(pasta_sala_de_situacao / "sala_de_situacao.parquet")
         print("Pronto!")
 
-    #INMET
+    # INMET
     if not "inmet" in ignorar_fontes:
         pass
-    
+
     print(" " * 100)
 
 
 if __name__ == "__main__":
     import parse_arguments
+
     args = parse_arguments.parse_args()
     processar(ignorar_fontes=set(args.sem_fontes))
