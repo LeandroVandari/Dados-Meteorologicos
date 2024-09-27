@@ -49,8 +49,7 @@ def baixar_inmet(year):
     if (not (dir_inmet / str(year)).exists()) or cuse_cached == False:
         arquivo = requests.get(f"https://portal.inmet.gov.br/uploads/dadoshistoricos/{year}.zip")
         arquivo_zip = zipfile.ZipFile(io.BytesIO(arquivo.content))
-        dir_ano = criar_pasta(dir_inmet, str(year))
-        arquivo_zip.extractall(dir_ano)
+        arquivo_zip.extractall(dir_inmet)
 
 def baixar_todos(lista_estacoes=None, use_cached=True):
     global cuse_cached
