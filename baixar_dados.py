@@ -88,4 +88,6 @@ end_dir = criar_pasta(Path.cwd(), "DADOS_ESTACOES/")
 cuse_cached = True
 
 if __name__ == "__main__":
-    baixar_todos()
+    import parse_arguments
+    args = parse_arguments.parse_args()
+    baixar_todos(use_cached=args["sem_cache"])
