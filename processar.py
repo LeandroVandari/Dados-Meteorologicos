@@ -135,7 +135,12 @@ def processar(
         print("\tSalvando em arquivo parquet...   ", end="", flush=True)
         final.write_parquet(pasta_sala_de_situacao / "sala_de_situacao.parquet")
         print("Pronto!")
-        print(" " * 100)
+
+    #INMET
+    if not "inmet" in ignorar_fontes:
+        pass
+    
+    print(" " * 100)
 
 
 if __name__ == "__main__":

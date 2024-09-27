@@ -89,4 +89,4 @@ cuse_cached = True
 if __name__ == "__main__":
     import parse_arguments
     args = parse_arguments.parse_args()
-    baixar_todos(use_cached=args["sem_cache"])
+    baixar_todos(use_cached=not args.sem_cache)
