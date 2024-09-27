@@ -146,5 +146,4 @@ def processar(
 if __name__ == "__main__":
     import parse_arguments
     args = parse_arguments.parse_args()
-    print(args)
     processar(ignorar_fontes=set(args.sem_fontes))
