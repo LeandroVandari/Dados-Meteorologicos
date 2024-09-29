@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import polars
 import altair
 import time
+import itertools
 
 altair.renderers.enable("browser")
 altair.data_transformers.enable("vegafusion")
@@ -89,6 +90,80 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | Non
         return normalizado
 
 
+col_set = set()
+
+
+def processar_inmet(enumeracao):
+    global col_set
+    idx, estacao, total = enumeracao
+    with open(estacao, "r", encoding="iso-8859-1") as f:
+        primeira_parte = f.read(1000)
+        dados = dict(
+            map(
+                lambda linha: linha.split(";"),
+                itertools.islice(primeira_parte.split("\n"), 8),
+            )
+        )
+        if dados["UF:"] != "RS":
+            return None
+        codigo_estacao = dados["CODIGO (WMO):"]
+        print(f"\tProcessando estação {codigo_estacao}...  ({idx}/{total})", end="\r")
+    df = polars.read_csv(
+        estacao,
+        separator=";",
+        decimal_comma=True,
+        encoding="iso-8859-1",
+        skip_rows=8,
+        null_values="-9999",
+        schema_overrides={
+            "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)": polars.Float64,
+            "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)": polars.Float64,
+            "PRESSÃO ATMOSFERICA MAX.NA HORA ANT. (AUT) (mB)": polars.Float64,
+            "PRESSÃO ATMOSFERICA MIN. NA HORA ANT. (AUT) (mB)": polars.Float64,
+            "RADIACAO GLOBAL (KJ/m²)": polars.Float64,
+            "RADIACAO GLOBAL (Kj/m²)": polars.Float64,
+            "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)": polars.Float64,
+            "TEMPERATURA DO PONTO DE ORVALHO (°C)": polars.Float64,
+            "TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C)": polars.Float64,
+            "TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C)": polars.Float64,
+            "TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C)": polars.Float64,
+            "TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C)": polars.Float64,
+            "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)": polars.Float64,
+            "UMIDADE REL. MIN. NA HORA ANT. (AUT) (%)": polars.Float64,
+            "UMIDADE RELATIVA DO AR, HORARIA (%)": polars.Float64,
+            "VENTO, DIREÇÃO HORARIA (gr) (° (gr))": polars.Float64,
+            "VENTO, RAJADA MAXIMA (m/s)": polars.Float64,
+            "VENTO, VELOCIDADE HORARIA (m/s)": polars.Float64,
+        },
+    )
+    try:
+        nome_dia, nome_hora = "DATA (YYYY-MM-DD)", "HORA (UTC)"
+        df = df.with_columns(
+            polars.col(nome_dia).str.strptime(polars.Date, "%Y-%m-%d").alias("Dia"),
+            polars.col(nome_hora).str.strptime(polars.Time, "%H:%M").alias("Horario"),
+        )
+    except:
+        nome_dia, nome_hora = "Data", "Hora UTC"
+        df = df.with_columns(
+            polars.col(nome_dia).str.strptime(polars.Date, "%Y/%m/%d").alias("Dia"),
+            polars.col(nome_hora)
+            .str.strptime(polars.Time, "%H%M UTC")
+            .alias("Horario"),
+        )
+        if df.get_column("RADIACAO GLOBAL (Kj/m²)", default=None) is not None:
+            df = df.rename({"RADIACAO GLOBAL (Kj/m²)": "RADIACAO GLOBAL (KJ/m²)"})
+
+    df = df.with_columns(
+        polars.col("Dia").dt.combine(polars.col("Horario")).alias("Timestamp"),
+        CodigoEstacao=polars.lit(codigo_estacao),
+    )
+    df = df.drop([nome_dia, nome_hora, "Dia", "Horario", ""]).select(
+        [polars.col("Timestamp").alias("Data"), polars.all().exclude("Timestamp")]
+    )
+
+    return df
+
+
 def processar(
     pasta_estacoes: Path = Path("DADOS_ESTACOES/"),
     pasta_processados: Path | None = None,
@@ -165,7 +240,29 @@ def processar(
 
     # INMET
     if not "inmet" in ignorar_fontes:
-        pass
+        pasta_inmet = pasta_processados / "INMET"
+        pasta_inmet.mkdir(exist_ok=True)
+        print(" " * 20, "\r\tCarregando arquivos do INMET...   ")
+        arquivos = [
+            arquivo
+            for ano in (pasta_estacoes / "INMET").iterdir()
+            for arquivo in ano.iterdir()
+        ]
+        total = len(arquivos)
+        arquivos = [(tup[0], tup[1], total) for tup in enumerate(arquivos)]
+        with ProcessPoolExecutor() as executor:
+            dfs = filter(
+                lambda i: i is not None, executor.map(processar_inmet, arquivos)
+            )
+        print("\033[A\tCarregando arquivos do INMET...   Pronto!")
+
+        print("\tOrdenando arquivos por data...                 ", end="", flush=True)
+        final = polars.concat(dfs).sort("Data")
+        print("Pronto!")
+        print("\tSalvando em arquivo parquet...   ", end="", flush=True)
+
+        final.write_parquet(pasta_inmet / "inmet.parquet")
+        print("Pronto!")
 
     print(" " * 100)
 
