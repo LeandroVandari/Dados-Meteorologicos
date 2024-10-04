@@ -136,7 +136,6 @@ def processar_inmet(enumeracao):
             "VENTO, VELOCIDADE HORARIA (m/s)": polars.Float64,
         },
     )
-    print(df)
     try:
         nome_dia, nome_hora = "DATA (YYYY-MM-DD)", "HORA (UTC)"
         df = df.with_columns(
