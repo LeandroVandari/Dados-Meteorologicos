@@ -7,6 +7,8 @@ import polars
 import altair
 import time
 import itertools
+import gc
+import multiprocessing as mp
 
 altair.renderers.enable("browser")
 altair.data_transformers.enable("vegafusion")
@@ -20,7 +22,7 @@ def sort_snirh(line, date_index):
 
 def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | None:
     idx, arquivo, total = arquivo
-    print(f"\tCARREGANDO: {idx}/{total}    ", end="\r")
+    print(f"\t\tCARREGANDO: {idx}/{total}    ", end="\r")
     if arquivo.exists():
         codigo_estacao = arquivo.parent.name
         nome_arquivo = arquivo
@@ -90,11 +92,9 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | Non
         return normalizado
 
 
-col_set = set()
 
 
 def processar_inmet(enumeracao):
-    global col_set
     idx, estacao, total = enumeracao
     with open(estacao, "r", encoding="iso-8859-1") as f:
         primeira_parte = f.read(1000)
@@ -107,7 +107,7 @@ def processar_inmet(enumeracao):
         if dados["UF:"] != "RS":
             return None
         codigo_estacao = dados["CODIGO (WMO):"]
-        print(f"\tProcessando estação {codigo_estacao}...  ({idx}/{total})", end="\r")
+        print(f"\t\tProcessando estação {codigo_estacao}...  ({idx}/{total})", end="\r")
     df = polars.read_csv(
         estacao,
         separator=";",
@@ -136,6 +136,7 @@ def processar_inmet(enumeracao):
             "VENTO, VELOCIDADE HORARIA (m/s)": polars.Float64,
         },
     )
+    print(df)
     try:
         nome_dia, nome_hora = "DATA (YYYY-MM-DD)", "HORA (UTC)"
         df = df.with_columns(
@@ -160,14 +161,14 @@ def processar_inmet(enumeracao):
     df = df.drop([nome_dia, nome_hora, "Dia", "Horario", ""]).select(
         [polars.col("Timestamp").alias("Data"), polars.all().exclude("Timestamp")]
     )
-
+    print(df)
     return df
 
 
 def processar(
     pasta_estacoes: Path = Path("DADOS_ESTACOES/"),
     pasta_processados: Path | None = None,
-    ignorar_fontes: set[str] = {},
+    ignorar_fontes: list[str] = [],
 ):
     print("Processando dados baixados...   ", end="\n", flush=True)
 
@@ -231,12 +232,16 @@ def processar(
             )
         print("\033[A\tCarregando arquivos da sala de situações...   Pronto!")
 
-        print("\tOrdenando arquivos por data...   ", end="", flush=True)
+        print("\t\tOrdenando arquivos por data...   ", end="", flush=True)
         final = polars.concat(arquivos).sort("Data")
         print("Pronto!")
-        print("\tSalvando em arquivo parquet...   ", end="", flush=True)
+        print("\t\tSalvando em arquivo parquet...   ", end="", flush=True)
         final.write_parquet(pasta_sala_de_situacao / "sala_de_situacao.parquet")
         print("Pronto!")
+
+        del final
+        del arquivos
+        gc.collect()
 
     # INMET
     if not "inmet" in ignorar_fontes:
@@ -250,13 +255,14 @@ def processar(
         ]
         total = len(arquivos)
         arquivos = [(tup[0], tup[1], total) for tup in enumerate(arquivos)]
-        with ProcessPoolExecutor() as executor:
+        ctx = mp.get_context("spawn")
+        with ProcessPoolExecutor(mp_context=ctx) as executor:
             dfs = filter(
                 lambda i: i is not None, executor.map(processar_inmet, arquivos)
             )
         print("\033[A\tCarregando arquivos do INMET...   Pronto!")
 
-        print("\tOrdenando arquivos por data...                 ", end="", flush=True)
+        print("\tOrdenando arquivos por data...\033[[K", end="", flush=True)
         final = polars.concat(dfs).sort("Data")
         print("Pronto!")
         print("\tSalvando em arquivo parquet...   ", end="", flush=True)

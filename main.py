@@ -5,5 +5,4 @@ lista_estacoes.baixar()
 
 use_cached = not args.sem_cache
 baixar_dados.baixar_todos(use_cached=use_cached)
-
 processar.processar(ignorar_fontes=set(args.sem_fontes))
