@@ -161,7 +161,6 @@ def processar_inmet(enumeracao):
     df = df.drop([nome_dia, nome_hora, "Dia", "Horario", ""]).select(
         [polars.col("Timestamp").alias("Data"), polars.all().exclude("Timestamp")]
     )
-    print(df)
     return df
 
 
@@ -255,8 +254,7 @@ def processar(
         ]
         total = len(arquivos)
         arquivos = [(tup[0], tup[1], total) for tup in enumerate(arquivos)]
-        ctx = mp.get_context("spawn")
-        with ProcessPoolExecutor(mp_context=ctx) as executor:
+        with ProcessPoolExecutor() as executor:
             dfs = filter(
                 lambda i: i is not None, executor.map(processar_inmet, arquivos)
             )
