@@ -36,7 +36,7 @@ def baixar(enumeracao, ignorar_fontes: set[str] = {}):
 
     if not "sala_de_situacao" in ignorar_fontes and (
         (not (dir_estacao / "sala_de_situacao.xlsx").exists()) or cuse_cached == False
-    ) :
+    ):
         arquivo_sala_de_situação = requests.get(
             f"https://saladesituacao.rs.gov.br/api/station/ana/sheet/{codigo}",
         )
@@ -55,7 +55,7 @@ def baixar_inmet(dir_inmet, year):
         arquivo = requests.get(
             f"https://portal.inmet.gov.br/uploads/dadoshistoricos/{year}.zip"
         )
-        
+
         arquivo_zip = zipfile.ZipFile(io.BytesIO(arquivo.content))
         if year >= 2020:
             dir_inmet = criar_pasta(dir_inmet, f"{year}")

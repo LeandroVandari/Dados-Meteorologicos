@@ -92,8 +92,6 @@ def abrir_sala_de_situacoes(arquivo: (int, Path, int)) -> polars.DataFrame | Non
         return normalizado
 
 
-
-
 def processar_inmet(enumeracao):
     idx, estacao, total = enumeracao
     with open(estacao, "r", encoding="iso-8859-1") as f:
@@ -136,7 +134,6 @@ def processar_inmet(enumeracao):
             "VENTO, VELOCIDADE HORARIA (m/s)": polars.Float64,
         },
     )
-    print(df)
     try:
         nome_dia, nome_hora = "DATA (YYYY-MM-DD)", "HORA (UTC)"
         df = df.with_columns(
@@ -260,7 +257,7 @@ def processar(
             )
         print("\033[A\tCarregando arquivos do INMET...   Pronto!")
 
-        print("\tOrdenando arquivos por data...\033[[K", end="", flush=True)
+        print("\tOrdenando arquivos por data...    ", end="", flush=True)
         final = polars.concat(dfs).sort("Data")
         print("Pronto!")
         print("\tSalvando em arquivo parquet...   ", end="", flush=True)

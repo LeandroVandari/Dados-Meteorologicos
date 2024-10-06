@@ -17,6 +17,6 @@ def parse_args():
         action="extend",
         nargs="+",
         choices=["snirh", "inmet", "sala_de_situacao"],
-        default=[]
+        default=[],
     )
     return parser.parse_args()
