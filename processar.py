@@ -158,7 +158,10 @@ def processar_inmet(enumeracao):
     df = df.drop([nome_dia, nome_hora, "Dia", "Horario", ""]).select(
         [polars.col("Timestamp").alias("Data"), polars.all().exclude("Timestamp")]
     )
-    return df
+    if df.get_column("Data")[0].year < 2023:
+        return None
+    df = df.drop_nulls()
+    return (codigo_estacao, df)
 
 
 def processar(
@@ -255,14 +258,43 @@ def processar(
             dfs = filter(
                 lambda i: i is not None, executor.map(processar_inmet, arquivos)
             )
+        dfs = [*dfs]
+        dfs_final = []
+        indices_foi = []
+        def rename_columns(col: str, i: int) -> str:
+            if col == "Data":
+                return col
+            return col + str(i)
+        for (i, (codigo, df)) in enumerate(dfs):
+            print(i, codigo)
+            for (j, (codigo_outra, df_outra)) in enumerate(dfs):
+                if i != j and codigo == codigo_outra and i not in indices_foi and j not in indices_foi:
+                    indices_foi.extend([i, j])
+                    new = df.extend(df_outra)
+                    new = new.rename(lambda col: rename_columns(col, i))
+                    dfs_final.append(new)
+            if not i in indices_foi:
+                df = df.rename(lambda col: rename_columns(col, i))
+                dfs_final.append(df)
+                indices_foi.append(i)
+        print(indices_foi)
+        dfs = dfs_final
         print("\033[A\tCarregando arquivos do INMET...   Pronto!")
-
+        df_final = dfs[0].lazy()
         print("\tOrdenando arquivos por data...    ", end="", flush=True)
-        final = polars.concat(dfs).sort("Data")
+        for (i, df) in enumerate(dfs):
+            if df.is_empty() or i == 0:
+                continue
+            print(i, end="\r")
+
+            df_final = df_final.join(df.lazy(), "Data", coalesce=True, how="full")
+        df_final = df_final.collect()
+        print(df_final.schema)
         print("Pronto!")
         print("\tSalvando em arquivo parquet...   ", end="", flush=True)
 
-        final.write_parquet(pasta_inmet / "inmet.parquet")
+        df_final.write_parquet(pasta_inmet / "inmet.parquet")
+        df_final.write_csv(pasta_inmet / "inmet.csv")
         print("Pronto!")
 
     print(" " * 100)

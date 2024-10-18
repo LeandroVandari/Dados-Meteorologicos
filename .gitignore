@@ -6,3 +6,15 @@ __pycache__/
 DADOS_ESTACOES_BACKUP/
 PROCESSADOS/
 lista_estacoes.txt
+include/
+bin/
+lib/
+lib64/
+Dados/
+teste/
+TESTE/
+cota.csv
+definicoes.txt
+modelo_teste*.py
+MODELO.keras
+pyenv.cfg
