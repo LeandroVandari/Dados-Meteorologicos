@@ -1,0 +1,33 @@
+body {
+    background-color: #1b1b32;
+    color: white;
+}
+
+#title {
+    text-align: center;
+    margin-bottom: 100px;
+}
+
+.button-link {
+    background-color: #0a0a23;
+    width: 30%;
+    border: 1px solid white;
+    
+    height: 30pt;
+    margin-bottom: 20px;
+    padding: 10px 15%;
+}
+
+#carregar {
+    color: white;
+    margin-bottom: 50px;
+    margin-top: 15px;
+    text-align: center;
+
+}
+
+.text {
+    color: white;
+    font-size: 14pt;
+
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Previsor de enchentes</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include eel.js - note this file doesn't exist in the 'web' directory -->
+    <script type="text/javascript" src="/eel.js"></script>
+    
+  </head>
+
+  <body>
+    <h1 id="title">Previsor de enchentes</h1>
+    <div style="text-align: center">
+        <label class="text" for="carregar"><b>Carregar um modelo:</b></label>
+        <br>
+        <input id="carregar" type="file" name="file">
+        <br>
+        <a href ="treinar.html" class="button-link text">Treinar novo modelo</a>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+    eel.expose(say_hello_js); // Expose this function to Python
+    function say_hello_js(x) {
+      console.log("Hello from " + x);
+    }
+    document.getElementById("carregar").addEventListener("change", function(event) {
+      let files = event.target.files;
+      console.log(files[0])
+      eel.carregar_modelo(files[0].name)
+      window.location.href = "executar.html";
+      },false);
+
+    //say_hello_js("Javascript World!");
+    //eel.say_hello_py("Javascript World!"); // Call a Python function
+  </script>
+</html>
