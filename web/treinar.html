@@ -17,8 +17,9 @@
     }
 
     function treinar() {
+      ;
       document.getElementById("treinamento").innerText = "Treinando...";
-      eel.treinar()().then(function (a) { 
+      eel.treinar(document.getElementById("dias").value)().then(function (a) { 
         document.getElementById("treinamento").innerText = "Treinamento completo!";
         document.getElementById("salvar").removeAttribute("disabled")
        })
@@ -46,8 +47,11 @@
   </div>
   <div style="text-align: left;">
     <label class="text" for="carregar_pasta">Selecione a pasta com os dados:</label>
-    <button type="button" class="cores botao" onclick="nomear_texto_com_pasta_requisitada('pasta')">Selecionar</button>
+    <button id="carregar_pasta" type="button" class="cores botao" onclick="nomear_texto_com_pasta_requisitada('pasta')">Selecionar</button>
     <label id="pasta"></label>
+  </div>
+  <div>
+    <label class="text" for="dias">Previsão para <input type="number" id="dias" value="0" class="cores" onkeypress="return event.charCode>=48 && event.charCode<=57"> dias à frente.</label>
   </div>
   <p class="text" id="treinamento"></p>
   <p class="text" id="salvamento"></p>

@@ -14,7 +14,6 @@ def LerArquivos(caminho_pasta):
     i = 0
     dict_df = {}
     for arquivos in arquivos_csv:
-        print(arquivos)
 
         nome = os.path.splitext(os.path.basename(arquivos))[0]
 
@@ -25,7 +24,7 @@ def LerArquivos(caminho_pasta):
     return dict_df
 
 # Defina o caminho para a pasta onde estão os arquivos CSV
-def treinar(caminho_pasta = "TESTE"):
+def treinar(caminho_pasta = "TESTE", dias_a_frente=0):
     dict_nomes = LerArquivos(caminho_pasta)
 
 
@@ -106,17 +105,16 @@ def treinar(caminho_pasta = "TESTE"):
     df_final = df_final[[s.name for s in df_final if not (s.null_count() == df_final.height)]]
 
     #df_final = df_final.drop_nulls()
-    print(df_final)
     df_final = df_final.select(pl.all().exclude("Data Medicao"))
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
     df_cota = pl.read_csv("cota.csv", separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
     df_cota = df_cota.with_columns(pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")).drop_nulls()
+    df_cota = df_cota.with_columns(pl.col("Data") - pl.duration(days=int(dias_a_frente)))
     df_final = df_final.sort("Data")
     cota = df_cota.sort("Data")
     df_junto = df_final.join_asof(cota, on="Data", tolerance="1h").drop_nulls()
-    print(df_junto)
     X= df_junto.select(pl.all().exclude(["Nível (cm)", "Data", "Hora Medicao"]))
     y = df_junto.get_column("Nível (cm)")
 

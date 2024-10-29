@@ -81,3 +81,33 @@ img {
     text-align: center;
     margin: none;
 }
+
+#dias {
+    width: 40pt;
+    border: 1px solid white;
+    font-size: 14pt;
+    height: 14pt;
+}
+
+
+
+
+
+
+
+
+
+
+/* Hide number input arrows */
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
