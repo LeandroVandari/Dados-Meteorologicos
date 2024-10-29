@@ -46,9 +46,13 @@
     </div>
   </div>
   <div style="text-align: left;">
-    <label class="text" for="carregar_pasta">Selecione a pasta com os dados:</label>
+    <label class="text" for="carregar_pasta">Selecione a pasta com os dados pluviométricos:</label>
     <button id="carregar_pasta" type="button" class="cores botao" onclick="nomear_texto_com_pasta_requisitada('pasta')">Selecionar</button>
     <label id="pasta"></label>
+  </div>
+  <div>
+    <label class="text" for="carregar_cota">Selecione o arquivo com os dados do nível da estação desejada:</label>
+    <input type="file" name="file" accept=".csv" class="cores" id="carregar_cota">
   </div>
   <div>
     <label class="text" for="dias">Previsão para <input type="number" id="dias" value="0" class="cores" onkeypress="return event.charCode>=48 && event.charCode<=57"> dias à frente.</label>
@@ -61,6 +65,18 @@
   <a style="width: 60pt; position: absolute; bottom: 10px; left: 190px; height: 17pt;" class="cores botao"
     href="executar.html">Executar</a>
 </body>
+
+<script type="text/javascript">
+  eel.expose(say_hello_js); // Expose this function to Python
+  function say_hello_js(x) {
+    console.log("Hello from " + x);
+  }
+  document.getElementById("carregar_cota").addEventListener("change", function (event) {
+    let files = event.target.files;
+    eel.arquivo_cota(files[0].name)
+  }, false);
+
+</script>
 
 
 </html>

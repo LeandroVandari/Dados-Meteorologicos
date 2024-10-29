@@ -24,7 +24,7 @@ def LerArquivos(caminho_pasta):
     return dict_df
 
 # Defina o caminho para a pasta onde estão os arquivos CSV
-def treinar(caminho_pasta = "TESTE", dias_a_frente=0):
+def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     dict_nomes = LerArquivos(caminho_pasta)
 
 
@@ -109,7 +109,7 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0):
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
-    df_cota = pl.read_csv("cota.csv", separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
+    df_cota = pl.read_csv(arquivo_cota, separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
     df_cota = df_cota.with_columns(pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")).drop_nulls()
     df_cota = df_cota.with_columns(pl.col("Data") - pl.duration(days=int(dias_a_frente)))
     df_final = df_final.sort("Data")
