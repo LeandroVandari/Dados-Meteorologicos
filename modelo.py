@@ -6,6 +6,7 @@ import tensorflow as tf
 import glob
 import os
 
+
 def LerArquivos(caminho_pasta):
 
     # Use glob para listar todos os arquivos CSV na pasta
@@ -23,22 +24,21 @@ def LerArquivos(caminho_pasta):
     # Retorna um dicionario com o nome dos arquivos
     return dict_df
 
-# Defina o caminho para a pasta onde estão os arquivos CSV
-def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
-    dict_nomes = LerArquivos(caminho_pasta)
 
+# Defina o caminho para a pasta onde estão os arquivos CSV
+def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
+    dict_nomes = LerArquivos(caminho_pasta)
 
     def rename_cols(col: str) -> str:
         if col == "Data":
             return col
         return col + nome_estacao
 
-
     dict_df = {}
     caminho_arquivo = caminho_pasta + "/" + dict_nomes["1"] + ".csv"
     with open(caminho_arquivo) as f:
         next(f)
-        nome_estacao=next(f).strip().split(": ")[1]
+        nome_estacao = next(f).strip().split(": ")[1]
     df_final = pl.read_csv(
         caminho_arquivo,
         separator=";",
@@ -53,10 +53,10 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
             "TEMPERATURA DA CPU DA ESTACAO(°C)": pl.Float64,
             "UMIDADE REL. MIN. NA HORA ANT. (AUT)(%)": pl.Float64,
             "UMIDADE REL. MAX. NA HORA ANT. (AUT)(%)": pl.Float64,
-            "VENTO, DIRECAO HORARIA (gr)(° (gr))": pl.Float64
+            "VENTO, DIRECAO HORARIA (gr)(° (gr))": pl.Float64,
         },
         try_parse_dates=False,
-        low_memory=True
+        low_memory=True,
     )
     initial_schema = df_final.schema
     df_final = df_final.with_columns(
@@ -68,10 +68,11 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         .with_columns(
             pl.col("Data Medicao").dt.combine(pl.col("Hora Medicao")).alias("Data")
         )
-        .drop_nulls().select(pl.all().exclude(["Data Medicao", "Hora Medicao"])).rename(rename_cols)
+        .drop_nulls()
+        .select(pl.all().exclude(["Data Medicao", "Hora Medicao"]))
+        .rename(rename_cols)
     )
     print(df_final.schema)
-
 
     # Carregar os arquivos inmet
     for i in range(2, len(dict_nomes) + 1):
@@ -79,17 +80,17 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         caminho_arquivo = caminho_pasta + "/" + file + ".csv"
         with open(caminho_arquivo) as f:
             next(f)
-            nome_estacao=next(f).strip().split(": ")[1]
+            nome_estacao = next(f).strip().split(": ")[1]
         print(f"{nome_estacao}: Em {caminho_arquivo}")
         df = pl.read_csv(
             caminho_arquivo,
             separator=";",
             skip_rows=10,
             decimal_comma=True,
-        schema=initial_schema,
+            schema=initial_schema,
             null_values="null",
             try_parse_dates=False,
-            low_memory=True
+            low_memory=True,
         )
         df = df.with_columns(
             pl.col("Hora Medicao").str.strptime(pl.Time, "%H%M"),
@@ -109,20 +110,32 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     # filter rows where all values are null
     df_final = df_final.filter(~pl.all_horizontal(pl.all().is_null()))
     # filter columns where all values are null
-    df_final = df_final[[s.name for s in df_final if not (s.null_count() == df_final.height)]]
+    df_final = df_final[
+        [s.name for s in df_final if not (s.null_count() == df_final.height)]
+    ]
     print(df_final.schema)
-    #df_final = df_final.drop_nulls()
+    # df_final = df_final.drop_nulls()
     df_final = df_final.select(pl.all().exclude("Data Medicao"))
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
-    df_cota = pl.read_csv(str(arquivo_cota), separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
-    df_cota = df_cota.with_columns(pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")).drop_nulls()
-    df_cota = df_cota.with_columns(pl.col("Data") - pl.duration(days=int(dias_a_frente)))
+    df_cota = pl.read_csv(
+        str(arquivo_cota),
+        separator=";",
+        skip_rows=4,
+        skip_rows_after_header=4,
+        columns=["Data", "Nível (cm)"],
+    )
+    df_cota = df_cota.with_columns(
+        pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")
+    ).drop_nulls()
+    df_cota = df_cota.with_columns(
+        pl.col("Data") - pl.duration(days=int(dias_a_frente))
+    )
     df_final = df_final.sort("Data")
     cota = df_cota.sort("Data")
     df_junto = df_final.join_asof(cota, on="Data", tolerance="1h").drop_nulls()
-    X= df_junto.select(pl.all().exclude(["Nível (cm)", "Data", "Hora Medicao"]))
+    X = df_junto.select(pl.all().exclude(["Nível (cm)", "Data", "Hora Medicao"]))
     y = df_junto.get_column("Nível (cm)")
 
     # Divisão dos dados em treino e teste (80% treino, 20% teste)
@@ -142,13 +155,16 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     y_train_normalizado = (y_train - y_min) / (y_max - y_min + epsilon)
     y_test_normalizado = (y_test - y_min) / (y_max - y_min + epsilon)
 
-
     # Construir o modelo da rede neural
     model = tf.keras.Sequential(
         [
             tf.keras.layers.InputLayer(input_shape=(X_train_scaled.shape[1],)),
-            tf.keras.layers.Dense(32, activation="relu", kernel_initializer="he_normal"),
-            tf.keras.layers.Dense(16, activation="relu", kernel_initializer="he_normal"),
+            tf.keras.layers.Dense(
+                32, activation="relu", kernel_initializer="he_normal"
+            ),
+            tf.keras.layers.Dense(
+                16, activation="relu", kernel_initializer="he_normal"
+            ),
             tf.keras.layers.Dense(1),
         ]
     )
@@ -161,15 +177,20 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     )
     # Treinar o modelo
     history = model.fit(
-        X_train_scaled, y_train_normalizado, epochs=20, batch_size=16, validation_split=0.2
+        X_train_scaled,
+        y_train_normalizado,
+        epochs=20,
+        batch_size=16,
+        validation_split=0.2,
     )
 
-    #print(list(map(lambda a: a[0] * (y_max - y_min) + y_min, model.predict(X_test_scaled))), y_test_normalizado, y_test, sep="\n\n")
+    # print(list(map(lambda a: a[0] * (y_max - y_min) + y_min, model.predict(X_test_scaled))), y_test_normalizado, y_test, sep="\n\n")
 
     # Avaliar o modelo nos dados de teste
     test_loss, test_mae = model.evaluate(X_test_scaled, y_test_normalizado)
     print(f"Erro médio absoluto nos dados de teste: {test_mae:.2f}")
     return model
+
 
 if __name__ == "__main__":
     model = treinar()

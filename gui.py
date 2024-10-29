@@ -12,22 +12,22 @@ root.withdraw()
 
 log_stream = StringIO()
 
-log = logging.getLogger('tensorflow')
+log = logging.getLogger("tensorflow")
 logging.basicConfig(stream=log_stream)
 
-configuracoes =  {
-    "modelo": None,
-    "pasta_dados": None
-}
+configuracoes = {"modelo": None, "pasta_dados": None}
+
 
 def main():
     eel.init("web")
     eel.start("main.html", mode="default")
 
+
 @eel.expose
 def carregar_modelo(caminho):
     global configuracoes
     configuracoes["modelo"] = tensorflow.keras.models.load_model(caminho)
+
 
 @eel.expose
 def requisitar_pasta():
@@ -36,15 +36,22 @@ def requisitar_pasta():
     print(f"Pasta selecionada: {file_path}")
     return file_path
 
+
 @eel.expose
 def treinar(dias_a_frente):
     print(dias_a_frente)
-    model = modelo.treinar(caminho_pasta=configuracoes["pasta_dados"], dias_a_frente=dias_a_frente, arquivo_cota=configuracoes["arquivo_cota"])
+    model = modelo.treinar(
+        caminho_pasta=configuracoes["pasta_dados"],
+        dias_a_frente=dias_a_frente,
+        arquivo_cota=configuracoes["arquivo_cota"],
+    )
     configuracoes["modelo"] = model
+
 
 @eel.expose
 def salvar():
     configuracoes["modelo"].save("MODELO.keras")
+
 
 @eel.expose
 def arquivo_cota(nome):
@@ -55,17 +62,19 @@ class StreamToLogger(object):
     """
     Fake file-like stream object that redirects writes to a logger instance.
     """
+
     def __init__(self, logger, level):
-       self.logger = logger
-       self.level = level
-       self.linebuf = ''
+        self.logger = logger
+        self.level = level
+        self.linebuf = ""
 
     def write(self, buf):
-       for line in buf.rstrip().splitlines():
-          self.logger.log(self.level, line.rstrip())
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.level, line.rstrip())
 
     def flush(self):
         pass
+
 
 """ sys.stdout=StreamToLogger(log, logging.INFO) """
 
