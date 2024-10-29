@@ -31,12 +31,16 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     def rename_cols(col: str) -> str:
         if col == "Data":
             return col
-        return col + str(i)
+        return col + nome_estacao
 
 
     dict_df = {}
+    caminho_arquivo = caminho_pasta + "/" + dict_nomes["1"] + ".csv"
+    with open(caminho_arquivo) as f:
+        next(f)
+        nome_estacao=next(f).strip().split(": ")[1]
     df_final = pl.read_csv(
-        caminho_pasta + "/" + dict_nomes["1"] + ".csv",
+        caminho_arquivo,
         separator=";",
         decimal_comma=True,
         skip_rows=10,
@@ -64,16 +68,19 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         .with_columns(
             pl.col("Data Medicao").dt.combine(pl.col("Hora Medicao")).alias("Data")
         )
-        .drop_nulls()
+        .drop_nulls().select(pl.all().exclude(["Data Medicao", "Hora Medicao"])).rename(rename_cols)
     )
+    print(df_final.schema)
 
 
     # Carregar os arquivos inmet
     for i in range(2, len(dict_nomes) + 1):
         file = dict_nomes[str(i)]
         caminho_arquivo = caminho_pasta + "/" + file + ".csv"
-
-        print(caminho_arquivo)
+        with open(caminho_arquivo) as f:
+            next(f)
+            nome_estacao=next(f).strip().split(": ")[1]
+        print(f"{nome_estacao}: Em {caminho_arquivo}")
         df = pl.read_csv(
             caminho_arquivo,
             separator=";",
@@ -91,7 +98,7 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         df = df.drop(df.columns[-1])
         df = df.with_columns(
             pl.col("Data Medicao").dt.combine(pl.col("Hora Medicao")).alias("Data")
-        )
+        ).select(pl.all().exclude(["Data Medicao", "Hora Medicao"]))
 
         df = df.filter(~pl.all_horizontal(pl.all().is_null()))
         df = df[[s.name for s in df if not (s.null_count() == df.height)]]
@@ -103,13 +110,13 @@ def treinar(caminho_pasta = "TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     df_final = df_final.filter(~pl.all_horizontal(pl.all().is_null()))
     # filter columns where all values are null
     df_final = df_final[[s.name for s in df_final if not (s.null_count() == df_final.height)]]
-
+    print(df_final.schema)
     #df_final = df_final.drop_nulls()
     df_final = df_final.select(pl.all().exclude("Data Medicao"))
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
-    df_cota = pl.read_csv(arquivo_cota, separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
+    df_cota = pl.read_csv(str(arquivo_cota), separator=";", skip_rows=4, skip_rows_after_header=4, columns=["Data", "Nível (cm)"])
     df_cota = df_cota.with_columns(pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")).drop_nulls()
     df_cota = df_cota.with_columns(pl.col("Data") - pl.duration(days=int(dias_a_frente)))
     df_final = df_final.sort("Data")

@@ -39,7 +39,7 @@ def requisitar_pasta():
 @eel.expose
 def treinar(dias_a_frente):
     print(dias_a_frente)
-    model = modelo.treinar(caminho_pasta=configuracoes["pasta_dados"], dias_a_frente=dias_a_frente, arquivo_cota=arquivo_cota)
+    model = modelo.treinar(caminho_pasta=configuracoes["pasta_dados"], dias_a_frente=dias_a_frente, arquivo_cota=configuracoes["arquivo_cota"])
     configuracoes["modelo"] = model
 
 @eel.expose

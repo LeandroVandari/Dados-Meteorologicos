@@ -17,7 +17,6 @@
     }
 
     function treinar() {
-      ;
       document.getElementById("treinamento").innerText = "Treinando...";
       eel.treinar(document.getElementById("dias").value)().then(function (a) { 
         document.getElementById("treinamento").innerText = "Treinamento completo!";
@@ -52,7 +51,7 @@
   </div>
   <div>
     <label class="text" for="carregar_cota">Selecione o arquivo com os dados do nível da estação desejada:</label>
-    <input type="file" name="file" accept=".csv" class="cores" id="carregar_cota">
+    <input type="file" name="file" accept=".csv" id="carregar_cota">
   </div>
   <div>
     <label class="text" for="dias">Previsão para <input type="number" id="dias" value="0" class="cores" onkeypress="return event.charCode>=48 && event.charCode<=57"> dias à frente.</label>
