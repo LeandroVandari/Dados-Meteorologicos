@@ -6,9 +6,7 @@ import tensorflow as tf
 import glob
 import os
 
-def LerArquivos():
-
-    global caminho_pasta
+def LerArquivos(caminho_pasta):
 
     # Use glob para listar todos os arquivos CSV na pasta
     arquivos_csv = glob.glob(os.path.join(caminho_pasta, "*.csv"))
@@ -16,6 +14,7 @@ def LerArquivos():
     i = 0
     dict_df = {}
     for arquivos in arquivos_csv:
+        print(arquivos)
 
         nome = os.path.splitext(os.path.basename(arquivos))[0]
 
@@ -27,7 +26,7 @@ def LerArquivos():
 
 # Defina o caminho para a pasta onde estão os arquivos CSV
 def treinar(caminho_pasta = "TESTE"):
-    dict_nomes = LerArquivos()
+    dict_nomes = LerArquivos(caminho_pasta)
 
 
     def rename_cols(col: str) -> str:
@@ -165,7 +164,8 @@ def treinar(caminho_pasta = "TESTE"):
     # Avaliar o modelo nos dados de teste
     test_loss, test_mae = model.evaluate(X_test_scaled, y_test_normalizado)
     print(f"Erro médio absoluto nos dados de teste: {test_mae:.2f}")
-    model.save("MODELO.keras")
+    return model
 
 if __name__ == "__main__":
-    treinar()
+    model = treinar()
+    model.save("MODELO.keras")
