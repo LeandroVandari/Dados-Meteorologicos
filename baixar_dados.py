@@ -4,7 +4,7 @@ import io
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
+import datetime
 
 from snirh import headers
 
@@ -89,7 +89,34 @@ def baixar_todos(lista_estacoes=None, use_cached=True, ignorar_fontes: set[str] 
             executor.map(lambda ano: baixar_inmet(dir_inmet, ano), anos)
         print("\033[ABaixando dados do INMET...   Pronto!")
 
+def requisitar_hoje(email):
+    email = email.replace("@", "%40")
+    hoje = datetime.datetime.now().strftime("%Y-%m-%d")
+    request_base = f"email={email}&tipo_dados=H&tipo_estacao=T&variaveis%5B%5D=I175&variaveis%5B%5D=I106&variaveis%5B%5D=I108&variaveis%5B%5D=I615&variaveis%5B%5D=I616&variaveis%5B%5D=I133&variaveis%5B%5D=I619&variaveis%5B%5D=I101&variaveis%5B%5D=I103&variaveis%5B%5D=I611&variaveis%5B%5D=I612&variaveis%5B%5D=I613&variaveis%5B%5D=I614&variaveis%5B%5D=I620&variaveis%5B%5D=I617&variaveis%5B%5D=I618&variaveis%5B%5D=I105&variaveis%5B%5D=I113&variaveis%5B%5D=I608&variaveis%5B%5D=I111"
+    with open("estacoes_modelo.txt", "r") as f:
+        estacoes = [estacao.strip() for estacao in f.readlines()]
+        for estacao in estacoes:
+            request_base += f"&estacoes%5B%5D={estacao}"
+    request_base += f"&data_inicio={hoje}&data_fim={hoje}&tipo_pontuacao=V"
+    r = requests.post(f"https://apibdmep.inmet.gov.br/requisicao", data=request_base)
 
+    """ headers={
+        "Sec-Ch-Ua-Platform": "\"Linux\"",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "*/*",
+        "Sec-Ch-Ua": "\"Not?A_Brand\";v=\"99\", \"Chromium\";v=\"130\"",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Sec-Ch-Ua-Mobile": "?0",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.59 Safari/537.36",
+        "Origin": "https\":/\"/bdmep.inmet.gov.br",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https\":/\"/bdmep.inmet.gov.br/",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Priority": "u=1, i",
+        "Connection": "keep-alive",
+    } """
 def criar_pasta(pai: Path, nome: str) -> str:
     pasta = pai / nome
     pasta.mkdir(exist_ok=True)

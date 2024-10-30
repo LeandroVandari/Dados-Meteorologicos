@@ -89,7 +89,7 @@ img {
     height: 14pt;
 }
 
-#carregar_cota {
+#carregar_cota, #arquivo_hoje {
     display: inline-block;
 }
 

@@ -19,7 +19,7 @@
     function treinar() {
       document.getElementById("treinamento").innerText = "Treinando...";
       eel.treinar(document.getElementById("dias").value)().then(function (a) { 
-        document.getElementById("treinamento").innerText = "Treinamento completo!";
+        document.getElementById("treinamento").innerText = `Treinamento completo! Erro médio: ${a.toFixed(2)}cm`;
         document.getElementById("salvar").removeAttribute("disabled")
        })
     }

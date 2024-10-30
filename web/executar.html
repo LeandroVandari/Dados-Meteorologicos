@@ -1,23 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Previsor de enchentes</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Include eel.js - note this file doesn't exist in the 'web' directory -->
-    <script type="text/javascript" src="/eel.js"></script>
-    
-  </head>
 
-  <body>
-    <div style="display:inline-block;vertical-align:top;">
-      <img src="icon.svg" width="100">
+<head>
+  <title>Previsor de enchentes</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Include eel.js - note this file doesn't exist in the 'web' directory -->
+  <script type="text/javascript" src="/eel.js"></script>
+  <script type="text/javascript">
+    function executar() {
+      eel.executar()().then(function (resultado) {
+        console.log(resultado);
+        document.getElementById("previsao").innerText = `Previsão do modelo: ${resultado.ToFixed(2)}cm`;
+      })
+    }
+  </script>
+</head>
+
+<body>
+  <div style="display:inline-block;vertical-align:top;">
+    <img src="icon.svg" width="100">
+  </div>
+  <div style="display:inline-block;">
+    <div>
+      <h1 class="cores" id="title">Previsor de enchentes</h1>
     </div>
-    <div style="display:inline-block;">
-      <div>
-        <h1 class="cores" id="title">Previsor de enchentes</h1>
-      </div>
-    </div>
-    
-  </body>
+  </div>
+
+  <div>
+    <label class="text" for="arquivo_hoje">Selecione o arquivo com os dados de hoje:</label>
+    <input type="file" name="file" accept=".zip" id="arquivo_hoje">
+  </div>
+
+  <div>
+    <button id="executar" type="button" class="cores botao opcoes" onclick="executar()">Executar</button>
+  </div>
+  <p id="previsao"></p>
+
+</body>
+<script type="text/javascript">
+  document.getElementById("arquivo_hoje").addEventListener("change", function (event) {
+    let files = event.target.files;
+    eel.arquivo_hoje(files[0].name)
+  }, false);
+</script>
 
 </html>

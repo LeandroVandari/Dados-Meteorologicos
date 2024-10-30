@@ -2,43 +2,26 @@ import polars as pl
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import pickle
 import tensorflow as tf
 import glob
 import os
 
 
-def LerArquivos(caminho_pasta):
+def abrir_pasta(caminho_pasta):
+    global estacoes_usadas
 
-    # Use glob para listar todos os arquivos CSV na pasta
-    arquivos_csv = glob.glob(os.path.join(caminho_pasta, "*.csv"))
-
-    i = 0
-    dict_df = {}
-    for arquivos in arquivos_csv:
-
-        nome = os.path.splitext(os.path.basename(arquivos))[0]
-
-        i += 1
-        dict_df.update({str(i): nome})
-
-    # Retorna um dicionario com o nome dos arquivos
-    return dict_df
-
-
-# Defina o caminho para a pasta onde estão os arquivos CSV
-def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     dict_nomes = LerArquivos(caminho_pasta)
-
+    print(dict_nomes)
     def rename_cols(col: str) -> str:
         if col == "Data":
             return col
         return col + nome_estacao
-
-    dict_df = {}
     caminho_arquivo = caminho_pasta + "/" + dict_nomes["1"] + ".csv"
     with open(caminho_arquivo) as f:
         next(f)
         nome_estacao = next(f).strip().split(": ")[1]
+    estacoes_usadas.append(nome_estacao)
     df_final = pl.read_csv(
         caminho_arquivo,
         separator=";",
@@ -72,7 +55,6 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         .select(pl.all().exclude(["Data Medicao", "Hora Medicao"]))
         .rename(rename_cols)
     )
-    print(df_final.schema)
 
     # Carregar os arquivos inmet
     for i in range(2, len(dict_nomes) + 1):
@@ -81,6 +63,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         with open(caminho_arquivo) as f:
             next(f)
             nome_estacao = next(f).strip().split(": ")[1]
+            estacoes_usadas.append(nome_estacao)
         print(f"{nome_estacao}: Em {caminho_arquivo}")
         df = pl.read_csv(
             caminho_arquivo,
@@ -113,9 +96,40 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     df_final = df_final[
         [s.name for s in df_final if not (s.null_count() == df_final.height)]
     ]
-    print(df_final.schema)
+
     # df_final = df_final.drop_nulls()
     df_final = df_final.select(pl.all().exclude("Data Medicao"))
+
+    return (df_final, dict_nomes)
+
+def LerArquivos(caminho_pasta):
+
+    # Use glob para listar todos os arquivos CSV na pasta
+    arquivos_csv = glob.glob(os.path.join(caminho_pasta, "*.csv"))
+
+    i = 0
+    dict_df = {}
+    for arquivos in arquivos_csv:
+
+        nome = os.path.splitext(os.path.basename(arquivos))[0]
+
+        i += 1
+        dict_df.update({str(i): nome})
+
+    # Retorna um dicionario com o nome dos arquivos
+    return dict_df
+
+estacoes_usadas = []
+# Defina o caminho para a pasta onde estão os arquivos CSV
+def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
+    global estacoes_usadas
+
+
+    dict_df = {}
+    (df_final, dict_nomes) = abrir_pasta(caminho_pasta)
+    with open("estacoes_modelo.txt", "w") as f:
+        print(os.getcwd())
+        f.write("\n".join(estacoes_usadas))
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
@@ -135,7 +149,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     df_final = df_final.sort("Data")
     cota = df_cota.sort("Data")
     df_junto = df_final.join_asof(cota, on="Data", tolerance="1h").drop_nulls()
-    X = df_junto.select(pl.all().exclude(["Nível (cm)", "Data", "Hora Medicao"]))
+    X = df_junto.select(pl.all().exclude(["Nível (cm)", "Data"]))
     y = df_junto.get_column("Nível (cm)")
 
     # Divisão dos dados em treino e teste (80% treino, 20% teste)
@@ -147,6 +161,8 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
+    with open ("scaler.bin", "wb") as f:
+        pickle.dump(scaler, f)
 
     y_min = y_train.min()
     y_max = y_train.max()
@@ -183,15 +199,23 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         batch_size=16,
         validation_split=0.2,
     )
-
-    # print(list(map(lambda a: a[0] * (y_max - y_min) + y_min, model.predict(X_test_scaled))), y_test_normalizado, y_test, sep="\n\n")
+    print(X_test_scaled)
+    with open("scale.txt", "w") as f:
+        f.write(f"{y_max}\n{y_min}")
+    erro = map(lambda a: abs(a[0]-a[1]), zip(list(map(lambda a: a[0] * (y_max - y_min) + y_min, model.predict(X_test_scaled))),  y_test))
+    erro = list(erro)
+    tamanho = len(erro)
+    erro = sum(erro) / len(erro)
+    print(erro, sep="\n\n")
 
     # Avaliar o modelo nos dados de teste
     test_loss, test_mae = model.evaluate(X_test_scaled, y_test_normalizado)
     print(f"Erro médio absoluto nos dados de teste: {test_mae:.2f}")
-    return model
+    return (model, erro)
 
 
 if __name__ == "__main__":
     model = treinar()
-    model.save("MODELO.keras")
+    model[0].save("MODELO.keras")
+
+
