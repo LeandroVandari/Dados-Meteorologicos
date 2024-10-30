@@ -1,0 +1,36 @@
+Nome: RIO GRANDE
+Codigo Estacao: A802
+Latitude: -32.07888888
+Longitude: -52.16777777
+Altitude: 4.92
+Situacao: Operante
+Data Inicial: 2024-10-30
+Data Final: 2024-10-30
+Periodicidade da Medicao: Horaria
+
+Data Medicao;Hora Medicao;PRECIPITACAO TOTAL, HORARIO(mm);PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA(mB);PRESSAO ATMOSFERICA REDUZIDA NIVEL DO MAR, AUT(mB);PRESSAO ATMOSFERICA MAX.NA HORA ANT. (AUT)(mB);PRESSAO ATMOSFERICA MIN. NA HORA ANT. (AUT)(mB);RADIACAO GLOBAL(Kj/m²);TEMPERATURA DA CPU DA ESTACAO(°C);TEMPERATURA DO AR - BULBO SECO, HORARIA(°C);TEMPERATURA DO PONTO DE ORVALHO(°C);TEMPERATURA MAXIMA NA HORA ANT. (AUT)(°C);TEMPERATURA MINIMA NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT)(°C);TENSAO DA BATERIA DA ESTACAO(V);UMIDADE REL. MAX. NA HORA ANT. (AUT)(%);UMIDADE REL. MIN. NA HORA ANT. (AUT)(%);UMIDADE RELATIVA DO AR, HORARIA(%);VENTO, DIRECAO HORARIA (gr)(° (gr));VENTO, RAJADA MAXIMA(m/s);VENTO, VELOCIDADE HORARIA(m/s);
+2024-10-30;0000;0;1018;1018,8;1018;1017,6;-3,5;22;20,7;19,5;20,7;20,6;19,6;19,4;12,8;93;92;92;81;6,5;3,4;
+2024-10-30;0100;0;1018,4;1019,2;1018,4;1018;-2,4;22;20,8;19,3;20,9;20,7;19,5;19,3;12,8;93;91;91;64;7,3;3,5;
+2024-10-30;0200;0;1018,1;1018,9;1018,4;1018,1;-3,5;22;20,6;19,3;20,8;20,6;19,4;19,3;12,8;92;91;92;63;7,4;3,1;
+2024-10-30;0300;0;1017,9;1018,7;1018,2;1017,9;-3,1;21;20,8;19,2;20,8;20,6;19,4;19,1;12,8;92;91;91;61;6,7;3;
+2024-10-30;0400;0;1017,8;1018,6;1017,9;1017,7;-3,1;21;20,8;18,8;20,8;20,6;19,2;18,8;12,8;91;89;89;57;8;4,1;
+2024-10-30;0500;0;1017,3;1018,1;1017,9;1017,3;-2,3;21;20,6;18,9;20,8;20,5;19,2;18,8;12,8;90;89;90;56;6,7;3;
+2024-10-30;0600;0;1016,8;1017,6;1017,3;1016,8;-2,8;21;20,5;19,1;20,6;20,4;19,1;18,9;12,8;92;90;92;61;6,6;3,5;
+2024-10-30;0700;0;1016,8;1017,6;1016,8;1016,7;-3;21;20,4;19,1;20,5;20,3;19,1;18,9;12,7;92;91;92;63;6,9;2,5;
+2024-10-30;0800;0;1017,2;1018;1017,2;1016,8;-3,2;21;20,4;19,1;20,5;20,3;19,3;19;12,7;93;92;92;62;5,5;2,6;
+2024-10-30;0900;0;1017,8;1018,6;1017,8;1017,2;26,1;21;20,5;19,2;20,5;20,3;19,2;19;12,7;92;92;92;69;5,8;3;
+2024-10-30;1000;0;1018,5;1019,3;1018,5;1017,8;422,2;22;21,5;19,7;21,5;20,5;19,7;19,2;13,1;92;89;90;68;7,3;3;
+2024-10-30;1100;0;1019;1019,8;1019;1018,5;1018;23;22,2;19,2;22,3;21,4;19,8;19;13,3;90;83;83;73;7,5;4,2;
+2024-10-30;1200;0;1019,1;1019,9;1019,1;1019;1594,2;24;23,2;19,4;23,4;22;19,9;18,9;13,3;84;79;79;78;8,1;4,7;
+2024-10-30;1300;0;1019,1;1019,9;1019,2;1019;2722;25;23,8;19,5;24;23;19,9;19,1;13,3;80;76;77;90;8,9;5,1;
+2024-10-30;1400;0;1018,8;1019,6;1019,2;1018,8;3139;25;23,4;18,9;24,2;23;20,2;18,8;13,4;79;76;76;87;10,2;5,6;
+2024-10-30;1500;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1600;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1700;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1800;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1900;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2000;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2100;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2200;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2300;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+

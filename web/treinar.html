@@ -18,17 +18,17 @@
 
     function treinar() {
       document.getElementById("treinamento").innerText = "Treinando...";
-      eel.treinar(document.getElementById("dias").value)().then(function (a) { 
+      eel.treinar(document.getElementById("dias").value)().then(function (a) {
         document.getElementById("treinamento").innerText = `Treinamento completo! Erro médio: ${a.toFixed(2)}cm`;
         document.getElementById("salvar").removeAttribute("disabled")
-       })
+      })
     }
 
     function salvar() {
       document.getElementById("salvamento").innerText = "Salvando...";
-      eel.salvar()().then(function (a) { 
+      eel.salvar()().then(function (a) {
         document.getElementById("salvamento").innerText = "Salvamento completo!";
-       })
+      })
     }
 
   </script>
@@ -46,7 +46,8 @@
   </div>
   <div style="text-align: left;">
     <label class="text" for="carregar_pasta">Selecione a pasta com os dados pluviométricos:</label>
-    <button id="carregar_pasta" type="button" class="cores botao" onclick="nomear_texto_com_pasta_requisitada('pasta')">Selecionar</button>
+    <button id="carregar_pasta" type="button" class="cores botao"
+      onclick="nomear_texto_com_pasta_requisitada('pasta')">Selecionar</button>
     <label id="pasta"></label>
   </div>
   <div>
@@ -54,7 +55,8 @@
     <input type="file" name="file" accept=".csv" id="carregar_cota">
   </div>
   <div>
-    <label class="text" for="dias">Previsão para <input type="number" id="dias" value="0" class="cores" onkeypress="return event.charCode>=48 && event.charCode<=57"> dias à frente.</label>
+    <label class="text" for="dias">Previsão para <input type="number" id="dias" value="0" class="cores"
+        onkeypress="return event.charCode>=48 && event.charCode<=57"> dias à frente.</label>
   </div>
   <p class="text" id="treinamento"></p>
   <p class="text" id="salvamento"></p>

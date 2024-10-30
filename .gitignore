@@ -20,3 +20,10 @@ MODELO.keras
 pyenv.cfg
 Dodos/
 MODELO_2.keras
+DadosHoje/
+hoje2/
+TREINAR/
+"Treinar (Copy)"/
+*.xlsx
+*.keras
+

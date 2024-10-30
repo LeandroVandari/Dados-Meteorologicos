@@ -1,0 +1,36 @@
+Nome: DIONISIO CERQUEIRA
+Codigo Estacao: A848
+Latitude: -26.286562
+Longitude: -53.633114
+Altitude: 807.54
+Situacao: Operante
+Data Inicial: 2024-10-30
+Data Final: 2024-10-30
+Periodicidade da Medicao: Horaria
+
+Data Medicao;Hora Medicao;PRECIPITACAO TOTAL, HORARIO(mm);PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA(mB);PRESSAO ATMOSFERICA REDUZIDA NIVEL DO MAR, AUT(mB);PRESSAO ATMOSFERICA MAX.NA HORA ANT. (AUT)(mB);PRESSAO ATMOSFERICA MIN. NA HORA ANT. (AUT)(mB);RADIACAO GLOBAL(Kj/m²);TEMPERATURA DA CPU DA ESTACAO(°C);TEMPERATURA DO AR - BULBO SECO, HORARIA(°C);TEMPERATURA DO PONTO DE ORVALHO(°C);TEMPERATURA MAXIMA NA HORA ANT. (AUT)(°C);TEMPERATURA MINIMA NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT)(°C);TENSAO DA BATERIA DA ESTACAO(V);UMIDADE REL. MAX. NA HORA ANT. (AUT)(%);UMIDADE REL. MIN. NA HORA ANT. (AUT)(%);UMIDADE RELATIVA DO AR, HORARIA(%);VENTO, DIRECAO HORARIA (gr)(° (gr));VENTO, RAJADA MAXIMA(m/s);VENTO, VELOCIDADE HORARIA(m/s);
+2024-10-30;0000;0;923,5;1013,5;923,5;923;-3,5;26;24,2;13,7;24,9;24,2;14,9;13,7;12,5;54;52;52;218;0;null;
+2024-10-30;0100;0;923,4;1013,5;923,6;923,4;-3,5;25;23,8;12,3;24,2;23,7;13,7;12,3;12,5;52;49;49;207;0;null;
+2024-10-30;0200;0;923,4;1013,6;923,4;923,3;-3,5;24;23,6;12;23,8;23,3;12,8;12;12,5;52;48;48;235;0;null;
+2024-10-30;0300;0;923,1;1013,4;923,4;923,1;-3,5;24;23,1;12,1;24,1;23,1;12,1;11,4;12,5;50;45;50;201;0;null;
+2024-10-30;0400;0;922,9;1013,7;923,1;922,9;-3,5;23;21,6;12,9;23,1;21,6;13,3;12,1;12,5;58;50;58;196;0;null;
+2024-10-30;0500;0;922,5;1013,5;922,9;922,5;-3,5;22;20,9;13,3;21,6;20,9;13,3;12,9;12,5;62;58;62;193;0;null;
+2024-10-30;0600;0;922,3;1013,2;922,5;922,3;-3,5;21;21,1;11,3;21,1;20,8;13,3;11,3;12,4;62;53;54;244;0;null;
+2024-10-30;0700;0;922,4;1013,3;922,4;922,2;-3,5;21;21;10,5;21,1;20,6;11,7;10,3;12,4;56;51;51;244;0;null;
+2024-10-30;0800;0;922,7;1013,7;922,7;922,4;-3,5;21;20,8;13;21,5;20,8;13;10,5;12,4;61;51;61;242;0;null;
+2024-10-30;0900;0;922,9;1014,1;922,9;922,6;13,4;21;20,2;15,3;20,8;20,1;15,3;13,1;12,4;74;61;73;246;0;null;
+2024-10-30;1000;0;923,4;1014,6;923,5;922,9;452,8;21;20,5;16,2;20,5;20,1;16,2;15,2;12,4;77;73;76;240;0;null;
+2024-10-30;1100;0;924;1014,7;924;923,4;1289,6;22;22,1;16,5;22,2;20,5;16,7;16,1;13;77;69;70;223;0;null;
+2024-10-30;1200;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1300;0;924;1013,9;924,1;923,9;2867,7;25;24,6;17;24,7;23,2;17,4;16,7;14,3;68;62;63;205;0;null;
+2024-10-30;1400;0;923,7;1013;924,1;923,7;3402,2;26;26,4;16,9;26,5;24,6;17,6;16,6;14,3;64;55;56;200;0;null;
+2024-10-30;1500;0;923,3;1012,3;923,8;923,3;3515,9;28;27,3;17;27,6;26,4;18;16,2;14,3;58;50;53;205;0;null;
+2024-10-30;1600;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1700;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1800;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1900;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2000;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2100;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2200;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2300;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+

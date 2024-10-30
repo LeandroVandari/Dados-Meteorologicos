@@ -10,8 +10,16 @@
     function executar() {
       eel.executar()().then(function (resultado) {
         console.log(resultado);
-        document.getElementById("previsao").innerText = `Previsão do modelo: ${resultado.ToFixed(2)}cm`;
+        document.getElementById("previsao").innerText = `Previsão do modelo: ${resultado.toFixed(2)}cm`;
       })
+    }
+    async function selectFolder() {
+      pasta = await eel.pasta_hoje()();
+      return pasta;
+    }
+    function nomear_texto_com_pasta_requisitada(id) {
+      selectFolder().then(function (nome) { document.getElementById(id).innerText = `(${nome})` });
+
     }
   </script>
 </head>
@@ -27,8 +35,9 @@
   </div>
 
   <div>
-    <label class="text" for="arquivo_hoje">Selecione o arquivo com os dados de hoje:</label>
-    <input type="file" name="file" accept=".zip" id="arquivo_hoje">
+    <label class="text" for="arquivo_hoje">Selecione a pasta com os dados de hoje:</label>
+    <button type="button" name="file" onclick="nomear_texto_com_pasta_requisitada('pasta')" id="arquivo_hoje" class="cores botao">Selecionar</button>
+    <label id="pasta"></label>
   </div>
 
   <div>

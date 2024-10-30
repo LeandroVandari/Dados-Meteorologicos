@@ -71,27 +71,26 @@ def requisitar_hoje(email):
     baixar_dados.requisitar_hoje(email)
 
 @eel.expose
-def arquivo_hoje(nome):
-    configuracoes["dados_hoje"] = nome
+def pasta_hoje():
+    file_path = filedialog.askdirectory()
+    configuracoes["dados_hoje"] = file_path
+    return file_path
 
 estacoes_usadas = []
 
 @eel.expose
 def executar():
-    zip_hoje = zipfile.ZipFile(configuracoes["dados_hoje"])
-    pasta_hoje = baixar_dados.criar_pasta(Path.cwd(), "DadosHoje")
-    zip_hoje.extractall(pasta_hoje)
-    subdir = os.listdir(pasta_hoje)[0]
+    pasta_hoje = configuracoes["dados_hoje"]
 
-    (dados_hoje, _) = modelo.abrir_pasta(str(pasta_hoje / subdir))
+    (dados_hoje, _) = modelo.abrir_pasta(str(pasta_hoje))
     with open("scaler.bin", "rb") as f:
 
         scaler = pickle.load(f)
-    dados_hoje = dados_hoje.sort("Data", descending=True).drop("Data")[0]
+    dados_hoje = dados_hoje.sort("Data", descending=True).drop_nulls().drop("Data")[0]
     with open("scale.txt", "r") as f:
         lines = f.readlines()
-        y_max = int(lines[0].strip())
-        y_min = int(lines[1].strip())
+        y_max = float(lines[0].strip())
+        y_min = float(lines[1].strip())
     print(dados_hoje)
     dados_scaled = scaler.transform(dados_hoje)
     previsao = configuracoes["modelo"].predict(dados_scaled)[0,0]

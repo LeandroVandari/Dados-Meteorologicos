@@ -37,6 +37,7 @@ def abrir_pasta(caminho_pasta):
             "UMIDADE REL. MIN. NA HORA ANT. (AUT)(%)": pl.Float64,
             "UMIDADE REL. MAX. NA HORA ANT. (AUT)(%)": pl.Float64,
             "VENTO, DIRECAO HORARIA (gr)(° (gr))": pl.Float64,
+            "TENSAO DA BATERIA DA ESTACAO(V)": pl.Float64
         },
         try_parse_dates=False,
         low_memory=True,
@@ -130,6 +131,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     with open("estacoes_modelo.txt", "w") as f:
         print(os.getcwd())
         f.write("\n".join(estacoes_usadas))
+    print(df_final)
     nomes_colunas_final = df_final.columns
     features = nomes_colunas_final
 
@@ -139,6 +141,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         skip_rows=4,
         skip_rows_after_header=4,
         columns=["Data", "Nível (cm)"],
+        schema_overrides= {"Nível (cm)": pl.Float64}
     )
     df_cota = df_cota.with_columns(
         pl.col("Data").str.strptime(pl.Datetime, "%d/%m/%Y %H:%M:%S")
@@ -175,6 +178,9 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     model = tf.keras.Sequential(
         [
             tf.keras.layers.InputLayer(input_shape=(X_train_scaled.shape[1],)),
+            tf.keras.layers.Dense(
+                64, activation="relu", kernel_initializer="he_normal"
+            ),
             tf.keras.layers.Dense(
                 32, activation="relu", kernel_initializer="he_normal"
             ),

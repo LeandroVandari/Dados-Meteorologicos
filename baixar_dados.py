@@ -98,9 +98,7 @@ def requisitar_hoje(email):
         for estacao in estacoes:
             request_base += f"&estacoes%5B%5D={estacao}"
     request_base += f"&data_inicio={hoje}&data_fim={hoje}&tipo_pontuacao=V"
-    r = requests.post(f"https://apibdmep.inmet.gov.br/requisicao", data=request_base)
-
-    """ headers={
+    r = requests.post(f"https://apibdmep.inmet.gov.br/requisicao", data=request_base, headers={
         "Sec-Ch-Ua-Platform": "\"Linux\"",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept": "*/*",
@@ -116,7 +114,9 @@ def requisitar_hoje(email):
         "Accept-Encoding": "gzip, deflate, br",
         "Priority": "u=1, i",
         "Connection": "keep-alive",
-    } """
+    })
+
+    print(r.text)
 def criar_pasta(pai: Path, nome: str) -> str:
     pasta = pai / nome
     pasta.mkdir(exist_ok=True)

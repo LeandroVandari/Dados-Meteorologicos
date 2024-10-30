@@ -1,0 +1,36 @@
+Nome: SANTA MARIA
+Codigo Estacao: A803
+Latitude: -29.72499999
+Longitude: -53.72055554
+Altitude: 103.1
+Situacao: Operante
+Data Inicial: 2024-10-30
+Data Final: 2024-10-30
+Periodicidade da Medicao: Horaria
+
+Data Medicao;Hora Medicao;PRECIPITACAO TOTAL, HORARIO(mm);PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA(mB);PRESSAO ATMOSFERICA REDUZIDA NIVEL DO MAR, AUT(mB);PRESSAO ATMOSFERICA MAX.NA HORA ANT. (AUT)(mB);PRESSAO ATMOSFERICA MIN. NA HORA ANT. (AUT)(mB);RADIACAO GLOBAL(Kj/m²);TEMPERATURA DA CPU DA ESTACAO(°C);TEMPERATURA DO AR - BULBO SECO, HORARIA(°C);TEMPERATURA DO PONTO DE ORVALHO(°C);TEMPERATURA MAXIMA NA HORA ANT. (AUT)(°C);TEMPERATURA MINIMA NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT)(°C);TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT)(°C);TENSAO DA BATERIA DA ESTACAO(V);UMIDADE REL. MAX. NA HORA ANT. (AUT)(%);UMIDADE REL. MIN. NA HORA ANT. (AUT)(%);UMIDADE RELATIVA DO AR, HORARIA(%);VENTO, DIRECAO HORARIA (gr)(° (gr));VENTO, RAJADA MAXIMA(m/s);VENTO, VELOCIDADE HORARIA(m/s);
+2024-10-30;0000;0;1003;1015,2;1003,1;1002,5;-3,6;25;22,1;16,6;23,1;21,7;18,1;16,5;12,6;79;70;71;149;2,3;1,2;
+2024-10-30;0100;0;1003,9;1016,1;1003,9;1003;-3,6;24;22,8;17,3;22,9;21,4;17,3;15,9;12,6;74;67;71;130;5;2,3;
+2024-10-30;0200;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;0300;0;1003,9;1016,2;1004,2;1003,9;-3,6;23;21,2;18,3;21,5;21;18,4;18;12,6;84;80;83;110;4,8;1,9;
+2024-10-30;0400;0;1003,7;1016;1003,9;1003,7;-3,6;22;20,4;18,3;21,3;20,4;18,4;18,2;12,6;88;83;88;104;4,9;1,6;
+2024-10-30;0500;0;1003,2;1015,5;1003,7;1003,2;-3,6;22;19,5;18,3;20,4;19,4;18,4;18,2;12,6;93;88;93;106;4,1;1,1;
+2024-10-30;0600;0;1002,9;1015,2;1003,2;1002,8;-3,6;21;19,3;18,4;19,6;19,2;18,5;18,3;12,6;95;93;95;131;4,5;2,3;
+2024-10-30;0700;0;1002,9;1015,3;1002,9;1002,8;-3,4;21;18,9;18,2;19,3;18,8;18,4;18,1;12,6;96;95;96;90;4,5;1,1;
+2024-10-30;0800;0;1003,6;1015,9;1003,6;1002,9;-2,9;20;19,2;18,5;19,3;18,7;18,5;18,1;12,5;97;95;95;129;3,6;1,4;
+2024-10-30;0900;0;1003,9;1016,2;1003,9;1003,5;9,6;21;19,3;18,3;19,3;19,2;18,5;18,3;12,5;95;94;94;111;4,7;1,2;
+2024-10-30;1000;0;1004,5;1016,8;1004,5;1003,9;174,5;21;19,7;18,2;19,7;19,3;18,4;18,1;12,7;95;91;91;128;4,2;1,8;
+2024-10-30;1100;0;1004,7;1017;1004,7;1004,5;629,3;22;20,5;18,4;20,6;19,7;18,6;18;13,3;91;86;88;100;5,5;2,6;
+2024-10-30;1200;0;1004,6;1016,8;1004,7;1004,6;1285;23;22,1;18,4;22,4;20,4;18,9;18,1;14,3;88;78;79;83;6,8;3;
+2024-10-30;1300;0;1004,4;1016,6;1004,6;1004,3;1194,5;24;22,9;18,1;23;21,7;19;18;14,3;82;74;74;107;6,8;2,8;
+2024-10-30;1400;0;1003,9;1016,1;1004,4;1003,9;1486,4;26;23,8;19;23,8;22,7;19,2;18;14,4;78;73;75;122;6,1;2,6;
+2024-10-30;1500;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1600;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1700;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1800;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;1900;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2000;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2100;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2200;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+2024-10-30;2300;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;null;
+
