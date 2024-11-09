@@ -7,6 +7,7 @@
   <!-- Include eel.js - note this file doesn't exist in the 'web' directory -->
   <script type="text/javascript" src="/eel.js"></script>
   <script type="text/javascript">
+    console.log("hi")
     function executar() {
       eel.executar()().then(function (resultado) {
         console.log(resultado);
@@ -21,6 +22,7 @@
       selectFolder().then(function (nome) { document.getElementById(id).innerText = `(${nome})` });
 
     }
+    console.log("still here ")
   </script>
 </head>
 
@@ -47,10 +49,12 @@
 
 </body>
 <script type="text/javascript">
+  
   document.getElementById("arquivo_hoje").addEventListener("change", function (event) {
     let files = event.target.files;
     eel.arquivo_hoje(files[0].name)
   }, false);
+  console.log("reached end");
 </script>
 
 </html>

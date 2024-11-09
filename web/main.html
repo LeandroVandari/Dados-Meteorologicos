@@ -6,7 +6,22 @@
   <link rel="stylesheet" href="styles.css">
   <!-- Include eel.js - note this file doesn't exist in the 'web' directory -->
   <script type="text/javascript" src="/eel.js"></script>
+  <script type="text/javascript">
+    async function selectFolder() {
+      pasta = await eel.pasta_hoje()();
+      return pasta;
+    }
+    async function carregar_modelo(nome) {
+      console.log(nome);
+       await eel.carregar_modelo(nome)();
+      console.log("carregado");
+    }
+    function carregar_e_trocar_janela() {
+      selectFolder().then(function (nome) { console.log(nome); carregar_modelo(nome).then(window.location.href = "/executar.html") });
+    }
 
+
+  </script>
 </head>
 
 <body>
@@ -21,9 +36,8 @@
 
 
   <div style="text-align: center">
-    <label class="cores botao botao_grande" for="carregar"><b>Carregar um modelo</b></label>
+    <button id="carregar" name="file" onclick="carregar_e_trocar_janela()" class="cores botao botao_grande"><b>Carregar um modelo</b></button>
     <br>
-    <input id="carregar" type="file" name="file" accept=".keras" class="cores">
     <br>
     <a href="treinar.html" class="cores botao botao_grande"><b>Treinar novo modelo</b></a>
   </div>
@@ -34,12 +48,6 @@
   function say_hello_js(x) {
     console.log("Hello from " + x);
   }
-  document.getElementById("carregar").addEventListener("change", function (event) {
-    let files = event.target.files;
-    console.log(files[0])
-    eel.carregar_modelo(files[0].name)
-    window.location.href = "executar.html";
-  }, false);
 
   //say_hello_js("Javascript World!");
   //eel.say_hello_py("Javascript World!"); // Call a Python function

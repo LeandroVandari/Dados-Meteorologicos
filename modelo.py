@@ -6,7 +6,7 @@ import pickle
 import tensorflow as tf
 import glob
 import os
-
+from pathlib import Path
 
 def abrir_pasta(caminho_pasta):
     global estacoes_usadas
@@ -122,13 +122,14 @@ def LerArquivos(caminho_pasta):
 
 estacoes_usadas = []
 # Defina o caminho para a pasta onde estão os arquivos CSV
-def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
+def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv", modelo_pasta = Path("MODELO")):
+    modelo_pasta.mkdir(exist_ok=True)
     global estacoes_usadas
 
 
     dict_df = {}
     (df_final, dict_nomes) = abrir_pasta(caminho_pasta)
-    with open("estacoes_modelo.txt", "w") as f:
+    with open(modelo_pasta / "estacoes_modelo.txt", "w") as f:
         print(os.getcwd())
         f.write("\n".join(estacoes_usadas))
     print(df_final)
@@ -149,6 +150,13 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     df_cota = df_cota.with_columns(
         pl.col("Data") - pl.duration(days=int(dias_a_frente))
     )
+    mediana_nivel = df_cota.select(
+            pl.median("Nível (cm)").alias("Mediana")
+        )[0, 0]
+    df_cota = df_cota.filter(
+            (abs(pl.col("Nível (cm)") - mediana_nivel) <= 1000)
+            | pl.col("Nível (cm)").is_null()
+        )
     df_final = df_final.sort("Data")
     cota = df_cota.sort("Data")
     df_junto = df_final.join_asof(cota, on="Data", tolerance="1h").drop_nulls()
@@ -164,7 +172,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
-    with open ("scaler.bin", "wb") as f:
+    with open (modelo_pasta / "scaler.bin", "wb") as f:
         pickle.dump(scaler, f)
 
     y_min = y_train.min()
@@ -206,7 +214,7 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
         validation_split=0.2,
     )
     print(X_test_scaled)
-    with open("scale.txt", "w") as f:
+    with open( modelo_pasta / "scale.txt", "w") as f:
         f.write(f"{y_max}\n{y_min}")
     erro = map(lambda a: abs(a[0]-a[1]), zip(list(map(lambda a: a[0] * (y_max - y_min) + y_min, model.predict(X_test_scaled))),  y_test))
     erro = list(erro)
@@ -222,6 +230,6 @@ def treinar(caminho_pasta="TESTE", dias_a_frente=0, arquivo_cota="cota.csv"):
 
 if __name__ == "__main__":
     model = treinar()
-    model[0].save("MODELO.keras")
+    model[0].save( modelo_pasta / "MODELO.keras")
 
 

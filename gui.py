@@ -23,7 +23,7 @@ log = logging.getLogger("tensorflow")
 logging.basicConfig(stream=log_stream)
 
 configuracoes = {"modelo": None, "pasta_dados": None}
-
+pasta_modelo = Path("MODELO")
 
 def main():
     eel.init("web")
@@ -34,7 +34,12 @@ def main():
 @eel.expose
 def carregar_modelo(caminho):
     global configuracoes
-    configuracoes["modelo"] = tensorflow.keras.models.load_model(caminho)
+    global pasta_modelo
+    print(caminho)
+    pasta_modelo=Path(caminho)
+    configuracoes["modelo"] = tensorflow.keras.models.load_model(Path(caminho) / "MODELO.keras")
+    print("loaded")
+    return None
 
 
 @eel.expose
@@ -59,11 +64,12 @@ def treinar(dias_a_frente):
 
 @eel.expose
 def salvar():
-    configuracoes["modelo"].save("MODELO.keras")
+    configuracoes["modelo"].save(pasta_modelo / "MODELO.keras")
 
 
 @eel.expose
 def arquivo_cota(nome):
+    print(nome)
     configuracoes["arquivo_cota"] = nome
 
 @eel.expose
@@ -83,11 +89,11 @@ def executar():
     pasta_hoje = configuracoes["dados_hoje"]
 
     (dados_hoje, _) = modelo.abrir_pasta(str(pasta_hoje))
-    with open("scaler.bin", "rb") as f:
+    with open(pasta_modelo / "scaler.bin", "rb") as f:
 
         scaler = pickle.load(f)
     dados_hoje = dados_hoje.sort("Data", descending=True).drop_nulls().drop("Data")[0]
-    with open("scale.txt", "r") as f:
+    with open(pasta_modelo / "scale.txt", "r") as f:
         lines = f.readlines()
         y_max = float(lines[0].strip())
         y_min = float(lines[1].strip())

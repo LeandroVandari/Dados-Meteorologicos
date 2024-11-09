@@ -89,8 +89,13 @@ img {
     height: 14pt;
 }
 
-#carregar_cota, #arquivo_hoje {
+#carregar_cota, #arquivo_hoje, #carregar {
     display: inline-block;
+}
+
+#carregar {
+    padding-bottom: 35pt;
+    width: 41.8%;
 }
 
 input[type="file"]::file-selector-button {

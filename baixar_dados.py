@@ -93,7 +93,7 @@ def requisitar_hoje(email):
     email = email.replace("@", "%40")
     hoje = datetime.datetime.now().strftime("%Y-%m-%d")
     request_base = f"email={email}&tipo_dados=H&tipo_estacao=T&variaveis%5B%5D=I175&variaveis%5B%5D=I106&variaveis%5B%5D=I108&variaveis%5B%5D=I615&variaveis%5B%5D=I616&variaveis%5B%5D=I133&variaveis%5B%5D=I619&variaveis%5B%5D=I101&variaveis%5B%5D=I103&variaveis%5B%5D=I611&variaveis%5B%5D=I612&variaveis%5B%5D=I613&variaveis%5B%5D=I614&variaveis%5B%5D=I620&variaveis%5B%5D=I617&variaveis%5B%5D=I618&variaveis%5B%5D=I105&variaveis%5B%5D=I113&variaveis%5B%5D=I608&variaveis%5B%5D=I111"
-    with open("estacoes_modelo.txt", "r") as f:
+    with open(Path("MODELO") / "estacoes_modelo.txt", "r") as f:
         estacoes = [estacao.strip() for estacao in f.readlines()]
         for estacao in estacoes:
             request_base += f"&estacoes%5B%5D={estacao}"

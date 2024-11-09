@@ -74,6 +74,7 @@
   }
   document.getElementById("carregar_cota").addEventListener("change", function (event) {
     let files = event.target.files;
+    console.log(files[0])
     eel.arquivo_cota(files[0].name)
   }, false);
 
